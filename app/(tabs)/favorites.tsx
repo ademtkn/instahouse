@@ -5,10 +5,12 @@ import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Heart, LogOut, MapPin, MessageCircle, Phone, Share2, UserRound } from 'lucide-react-native';
 import { callSeller, openWhatsApp, shareListing } from '../../components/ActionButtons';
+import CurrencySwitch from '../../components/CurrencySwitch';
 import { Colors } from '../../constants/colors';
 import { label } from '../../constants/i18n';
 import { useAuth } from '../../context/AuthContext';
 import { useFavorites } from '../../context/FavoritesContext';
+import { useCurrency } from '../../context/CurrencyContext';
 import { useLang } from '../../context/LanguageContext';
 import { fetchListings } from '../../services/listingService';
 import type { Listing } from '../../types/listing';
@@ -21,6 +23,7 @@ export default function FavoritesScreen() {
   const { ids, toggle } = useFavorites();
   const { user, requireAuth, signOut } = useAuth();
   const { lang, t } = useLang();
+  const { currency } = useCurrency();
   const [listings, setListings] = useState<Listing[]>([]);
 
   useEffect(() => {
@@ -31,7 +34,10 @@ export default function FavoritesScreen() {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top + 12 }]}>
-      <Text style={styles.heading}>{t('fav.title')}</Text>
+      <View style={styles.headingRow}>
+        <Text style={styles.heading}>{t('fav.title')}</Text>
+        <CurrencySwitch />
+      </View>
 
       {user && (
         <View style={styles.account}>
@@ -82,9 +88,9 @@ export default function FavoritesScreen() {
                   {listingTitle(item, lang)}
                 </Text>
                 <View style={styles.priceRow}>
-                  <Text style={styles.price}>{priceLabel(item, item.priceUsd, lang)}</Text>
+                  <Text style={styles.price}>{priceLabel(item, item.priceUsd, lang, currency)}</Text>
                   {item.oldPriceUsd !== undefined && item.oldPriceUsd > item.priceUsd && (
-                    <Text style={styles.oldPrice}>{priceLabel(item, item.oldPriceUsd, lang)}</Text>
+                    <Text style={styles.oldPrice}>{priceLabel(item, item.oldPriceUsd, lang, currency)}</Text>
                   )}
                 </View>
                 <View style={styles.city}>
@@ -96,7 +102,7 @@ export default function FavoritesScreen() {
               </View>
               <View style={styles.actions}>
                 <View style={styles.actionRow}>
-                  <Pressable onPress={() => shareListing(item, lang)} hitSlop={8}>
+                  <Pressable onPress={() => shareListing(item, lang, currency)} hitSlop={8}>
                     <Share2 size={20} color={Colors.textMuted} />
                   </Pressable>
                   <Pressable onPress={() => toggle(item.id)} hitSlop={8}>
@@ -106,7 +112,7 @@ export default function FavoritesScreen() {
                 <View style={styles.actionRow}>
                   <Pressable
                     style={[styles.iconBtn, { backgroundColor: Colors.whatsapp }]}
-                    onPress={() => openWhatsApp(item, lang)}
+                    onPress={() => openWhatsApp(item, lang, currency)}
                   >
                     <MessageCircle size={18} color={Colors.white} />
                   </Pressable>
@@ -128,6 +134,7 @@ export default function FavoritesScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.navy },
+  headingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingRight: 16 },
   heading: { color: Colors.white, fontSize: 28, fontWeight: '900', paddingHorizontal: 16 },
   account: {
     marginHorizontal: 16,

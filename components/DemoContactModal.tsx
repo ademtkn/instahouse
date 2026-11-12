@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { MessageCircle, Phone, X } from 'lucide-react-native';
 import { Colors } from '../constants/colors';
+import { useCurrency } from '../context/CurrencyContext';
 import { useLang } from '../context/LanguageContext';
 import type { Listing } from '../types/listing';
 import { priceLabel } from '../utils/format';
@@ -24,6 +25,7 @@ export function showDemoContact(r: Request) {
 export default function DemoContactModal() {
   const [req, setReq] = useState<Request | null>(null);
   const { lang } = useLang();
+  const { currency } = useCurrency();
 
   useEffect(() => {
     listeners.add(setReq);
@@ -58,7 +60,7 @@ export default function DemoContactModal() {
               </View>
             )}
             <Text style={styles.home}>
-              {listingTitle(req.listing, lang)}, {req.listing.district} — {priceLabel(req.listing, req.listing.priceUsd, lang)}
+              {listingTitle(req.listing, lang)}, {req.listing.district} — {priceLabel(req.listing, req.listing.priceUsd, lang, currency)}
             </Text>
             <Pressable style={styles.ok} onPress={close}>
               <Text style={styles.okText}>Anladım</Text>

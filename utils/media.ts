@@ -2,9 +2,9 @@ import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 
 // Files in /public are served by the web build under the site's base URL
-// (e.g. /InstaHouse on GitHub Pages). Native builds have no local web server,
+// (e.g. /instahouse on GitHub Pages). Native builds have no local web server,
 // so they load the same files from the published site.
-const PUBLISHED_SITE = 'https://ademtkn.github.io/InstaHouse';
+const PUBLISHED_SITE = 'https://ademtkn.github.io/instahouse';
 
 export function mediaUrl(file: string): string {
   if (Platform.OS === 'web') {

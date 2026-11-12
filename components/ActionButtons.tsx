@@ -5,13 +5,14 @@ import { MessageCircle, Phone } from 'lucide-react-native';
 import { Colors } from '../constants/colors';
 import { DEMO_MODE } from '../constants/config';
 import { translate, type Lang } from '../constants/i18n';
+import { useCurrency } from '../context/CurrencyContext';
 import { useLang } from '../context/LanguageContext';
 import type { Listing } from '../types/listing';
-import { priceLabel } from '../utils/format';
+import { priceLabel, type Currency } from '../utils/format';
 import { listingTitle } from '../utils/title';
 import { showDemoContact } from './DemoContactModal';
 
-export const SITE_URL = 'https://ademtkn.github.io/InstaHouse';
+export const SITE_URL = 'https://ademtkn.github.io/instahouse';
 export const listingUrl = (l: Listing) => `${SITE_URL}/?home=${l.id}`;
 const fullTitle = (l: Listing, lang: Lang) => `${listingTitle(l, lang)}, ${l.district}`;
 
@@ -27,9 +28,9 @@ async function open(url: string) {
   }
 }
 
-export function openWhatsApp(l: Listing, lang: Lang) {
+export function openWhatsApp(l: Listing, lang: Lang, currency: Currency) {
   const digits = l.whatsappPhone.replace(/\D/g, '');
-  const text = translate(lang, 'wa.message', { home: fullTitle(l, lang), price: priceLabel(l, l.priceUsd, lang) });
+  const text = translate(lang, 'wa.message', { home: fullTitle(l, lang), price: priceLabel(l, l.priceUsd, lang, currency) });
   tap();
   if (DEMO_MODE) return showDemoContact({ kind: 'whatsapp', listing: l, message: text });
   open(`https://wa.me/${digits}?text=${encodeURIComponent(text)}`);
@@ -43,10 +44,10 @@ export function callSeller(l: Listing) {
 
 // Share sheet where there is one (phones, native), otherwise straight to a
 // WhatsApp composer with the link — a home is a family decision.
-export async function shareListing(l: Listing, lang: Lang) {
+export async function shareListing(l: Listing, lang: Lang, currency: Currency) {
   const url = listingUrl(l);
   const title = fullTitle(l, lang);
-  const text = translate(lang, 'share.text', { home: title, price: priceLabel(l, l.priceUsd, lang), url });
+  const text = translate(lang, 'share.text', { home: title, price: priceLabel(l, l.priceUsd, lang, currency), url });
   tap();
   if (Platform.OS === 'web') {
     const nav = globalThis.navigator as Navigator | undefined;
@@ -106,6 +107,7 @@ function BigButton({
 
 export default function ActionButtons({ listing }: { listing: Listing }) {
   const { lang, t } = useLang();
+  const { currency } = useCurrency();
   return (
     <View style={styles.row}>
       <BigButton
@@ -113,7 +115,7 @@ export default function ActionButtons({ listing }: { listing: Listing }) {
         color={Colors.whatsapp}
         textColor={Colors.white}
         icon={<MessageCircle size={22} color={Colors.white} strokeWidth={2.4} />}
-        onPress={() => openWhatsApp(listing, lang)}
+        onPress={() => openWhatsApp(listing, lang, currency)}
       />
       <BigButton
         label={t('btn.call')}

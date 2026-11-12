@@ -2,8 +2,10 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Sparkles } from 'lucide-react-native';
 import { Colors } from '../constants/colors';
 import { label } from '../constants/i18n';
+import { useCurrency } from '../context/CurrencyContext';
 import { useLang } from '../context/LanguageContext';
-import { PRICE_RANGES, ROOMS_FILTERS } from '../services/listingService';
+import { PRICE_RANGES, ROOMS_FILTERS, type PriceRange } from '../services/listingService';
+import { formatFilterBound } from '../utils/format';
 import type { DealType, ListingFilters, PropertyType } from '../types/listing';
 
 const DEAL_TYPES: DealType[] = ['sale', 'rent'];
@@ -50,6 +52,13 @@ function Chip({
 
 export default function FilterBar({ filters, onChange, resultCount, newToday, priceDrops }: Props) {
   const { lang, t } = useLang();
+  const { currency } = useCurrency();
+  const rangeLabel = (r: PriceRange) => {
+    if (r.id === 'all') return t('filter.allPrices');
+    if (r.min === 0) return `< ${formatFilterBound(r.max, currency, lang)}`;
+    if (r.max === Infinity) return `${formatFilterBound(r.min, currency, lang)} +`;
+    return `${formatFilterBound(r.min, currency, lang)} – ${formatFilterBound(r.max, currency, lang)}`;
+  };
   const freshLabel = [newToday > 0 && t('feed.today', { n: newToday }), priceDrops > 0 && t('feed.drops', { n: priceDrops })]
     .filter(Boolean)
     .join(' · ');
@@ -96,7 +105,7 @@ export default function FilterBar({ filters, onChange, resultCount, newToday, pr
         {PRICE_RANGES[filters.dealType].map((r) => (
           <Chip
             key={r.id}
-            label={r.id === 'all' ? t('filter.allPrices') : r.label}
+            label={rangeLabel(r)}
             active={filters.priceRange === r.id}
             onPress={() => onChange({ ...filters, priceRange: r.id })}
           />

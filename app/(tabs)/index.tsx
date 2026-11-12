@@ -16,6 +16,7 @@ import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { RefreshCw, SearchX } from 'lucide-react-native';
 import ListingCard from '../../components/ListingCard';
 import FilterBar from '../../components/FilterBar';
+import CurrencySwitch from '../../components/CurrencySwitch';
 import { Colors } from '../../constants/colors';
 import { useFavorites } from '../../context/FavoritesContext';
 import {
@@ -282,19 +283,22 @@ export default function FeedScreen() {
           <Pressable onPress={refreshNow} style={styles.logoWrap} hitSlop={8}>
             <Text style={styles.logo}>InstaHouse</Text>
           </Pressable>
-          <View style={styles.langRow}>
-            {LANGS.map((l) => (
-              <Pressable
-                key={l}
-                onPress={() => setLang(l)}
-                style={[styles.langChip, l === lang && styles.langChipActive]}
-                hitSlop={4}
-                accessibilityRole="button"
-                accessibilityState={{ selected: l === lang }}
-              >
-                <Text style={[styles.langText, l === lang && styles.langTextActive]}>{LANG_LABEL[l]}</Text>
-              </Pressable>
-            ))}
+          <View style={styles.switches}>
+            <CurrencySwitch />
+            <View style={styles.langRow}>
+              {LANGS.map((l) => (
+                <Pressable
+                  key={l}
+                  onPress={() => setLang(l)}
+                  style={[styles.langChip, l === lang && styles.langChipActive]}
+                  hitSlop={4}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: l === lang }}
+                >
+                  <Text style={[styles.langText, l === lang && styles.langTextActive]}>{LANG_LABEL[l]}</Text>
+                </Pressable>
+              ))}
+            </View>
           </View>
         </View>
         <FilterBar
@@ -332,6 +336,7 @@ const styles = StyleSheet.create({
   resetText: { color: Colors.navy, fontWeight: '800' },
   bar: { position: 'absolute', top: 0, left: 0, right: 0, paddingBottom: 8, gap: 8 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingRight: 14 },
+  switches: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   logoWrap: { alignSelf: 'flex-start' },
   langRow: { flexDirection: 'row', backgroundColor: Colors.glass, borderRadius: 14, padding: 2, borderWidth: 1, borderColor: Colors.glassBorder },
   langChip: { paddingHorizontal: 9, paddingVertical: 4, borderRadius: 12 },

@@ -8,6 +8,10 @@ export const DEMO_MODE = false;
 // out of the feed. Sellers are told to get in touch again to extend it.
 export const LISTING_LIFETIME_DAYS = 15;
 
+// Official USD rate of the National Bank of the Kyrgyz Republic on 12 Nov 2026
+// (87.4496). Listings are stored in dollars; som is this rate, rounded for display.
+export const SOM_PER_USD = 87.45;
+
 // Only the administrator posts listings; people send their property details here.
 // Telegram and e-mail are placeholders until the owner provides real ones.
 export const ADMIN_CONTACTS = {

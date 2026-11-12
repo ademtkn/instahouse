@@ -38,9 +38,10 @@ import {
 } from 'lucide-react-native';
 import { Colors } from '../constants/colors';
 import { label } from '../constants/i18n';
+import { useCurrency } from '../context/CurrencyContext';
 import { useLang } from '../context/LanguageContext';
 import type { Listing, Photo } from '../types/listing';
-import { formatArea, formatSotka, priceLabel } from '../utils/format';
+import { formatArea, formatSotka, priceDropLabel, priceLabel } from '../utils/format';
 import { listingTitle } from '../utils/title';
 import ActionButtons, { shareListing } from './ActionButtons';
 import FeedVideo from './FeedVideo';
@@ -97,6 +98,7 @@ function ListingCard({
   onDoubleTapFavorite,
 }: Props) {
   const { lang, t } = useLang();
+  const { currency } = useCurrency();
   const [photoIndex, setPhotoIndex] = useState(0);
   const listRef = useRef<FlatList<Photo>>(null);
   const lastTap = useRef(0);
@@ -334,13 +336,13 @@ function ListingCard({
               </Text>
             </View>
             <View style={styles.priceRow}>
-              <Text style={styles.price}>{priceLabel(listing, listing.priceUsd, lang)}</Text>
+              <Text style={styles.price}>{priceLabel(listing, listing.priceUsd, lang, currency)}</Text>
               {priceDrop && (
                 <>
-                  <Text style={styles.oldPrice}>{priceLabel(listing, listing.oldPriceUsd!, lang)}</Text>
+                  <Text style={styles.oldPrice}>{priceLabel(listing, listing.oldPriceUsd!, lang, currency)}</Text>
                   <View style={styles.dropBadge}>
                     <Text style={styles.dropText}>
-                      {t('card.priceDrop')} −{priceLabel(listing, listing.oldPriceUsd! - listing.priceUsd, lang)}
+                      {t('card.priceDrop')} −{priceDropLabel(listing, lang, currency)}
                     </Text>
                   </View>
                 </>
@@ -412,7 +414,7 @@ function ListingCard({
             </Pressable>
             <Text style={styles.sideLabel}>{compact(listing.likes + (isFavorite ? 1 : 0))}</Text>
             <Pressable
-              onPress={() => shareListing(listing, lang)}
+              onPress={() => shareListing(listing, lang, currency)}
               hitSlop={10}
               style={styles.roundButton}
               accessibilityRole="button"
