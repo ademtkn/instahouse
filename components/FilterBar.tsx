@@ -1,0 +1,152 @@
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Sparkles } from 'lucide-react-native';
+import { Colors } from '../constants/colors';
+import { label } from '../constants/i18n';
+import { useLang } from '../context/LanguageContext';
+import { PRICE_RANGES, ROOMS_FILTERS } from '../services/listingService';
+import type { DealType, ListingFilters, PropertyType } from '../types/listing';
+
+const DEAL_TYPES: DealType[] = ['sale', 'rent'];
+const PROPERTY_TYPES: PropertyType[] = ['apartment', 'house', 'dacha', 'land', 'commercial'];
+
+interface Props {
+  filters: ListingFilters;
+  onChange: (next: ListingFilters) => void;
+  resultCount: number;
+  newToday: number;
+  priceDrops: number;
+}
+
+function Chip({
+  label,
+  active,
+  onPress,
+  icon,
+  accent,
+}: {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+  icon?: React.ReactNode;
+  accent?: boolean;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.chip,
+        accent && styles.chipAccent,
+        active && styles.chipActive,
+        pressed && { opacity: 0.75 },
+      ]}
+      accessibilityRole="button"
+      accessibilityState={{ selected: active }}
+    >
+      {icon}
+      <Text style={[styles.chipText, active && styles.chipTextActive]}>{label}</Text>
+    </Pressable>
+  );
+}
+
+export default function FilterBar({ filters, onChange, resultCount, newToday, priceDrops }: Props) {
+  const { lang, t } = useLang();
+  const freshLabel = [newToday > 0 && t('feed.today', { n: newToday }), priceDrops > 0 && t('feed.drops', { n: priceDrops })]
+    .filter(Boolean)
+    .join(' · ');
+  const showRooms = filters.type === null || filters.type === 'apartment' || filters.type === 'house' || filters.type === 'dacha';
+
+  return (
+    <View style={styles.wrap}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
+        {/* "What's new" first: the reason to open the app again tomorrow. */}
+        {freshLabel !== '' && (
+          <Chip
+            label={freshLabel}
+            accent
+            active={filters.onlyNew}
+            icon={<Sparkles size={13} color={filters.onlyNew ? Colors.navy : Colors.amber} />}
+            onPress={() => onChange({ ...filters, onlyNew: !filters.onlyNew })}
+          />
+        )}
+        {/* Sale / rent is a switch, not a filter: prices mean different things. */}
+        <View style={styles.segment}>
+          {DEAL_TYPES.map((d) => (
+            <Pressable
+              key={d}
+              onPress={() => onChange({ ...filters, dealType: d, priceRange: 'all' })}
+              style={[styles.segmentItem, filters.dealType === d && styles.segmentActive]}
+              accessibilityRole="button"
+              accessibilityState={{ selected: filters.dealType === d }}
+            >
+              <Text style={[styles.chipText, filters.dealType === d && styles.chipTextActive]}>{label.dealType(lang, d)}</Text>
+            </Pressable>
+          ))}
+        </View>
+        <Chip label={t('filter.all')} active={filters.type === null} onPress={() => onChange({ ...filters, type: null })} />
+        {PROPERTY_TYPES.map((p) => (
+          <Chip
+            key={p}
+            label={label.type(lang, p)}
+            active={filters.type === p}
+            onPress={() => onChange({ ...filters, type: filters.type === p ? null : p, rooms: p === 'land' || p === 'commercial' ? 'all' : filters.rooms })}
+          />
+        ))}
+      </ScrollView>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
+        {PRICE_RANGES[filters.dealType].map((r) => (
+          <Chip
+            key={r.id}
+            label={r.id === 'all' ? t('filter.allPrices') : r.label}
+            active={filters.priceRange === r.id}
+            onPress={() => onChange({ ...filters, priceRange: r.id })}
+          />
+        ))}
+        {showRooms &&
+          ROOMS_FILTERS.map((r) => (
+            <Chip
+              key={r}
+              label={r === 'all' ? t('filter.allRooms') : r === '4+' ? t('filter.rooms4') : t('filter.rooms', { n: r })}
+              active={filters.rooms === r}
+              onPress={() => onChange({ ...filters, rooms: r })}
+            />
+          ))}
+        <View style={styles.count}>
+          <Text style={styles.countText}>{t('filter.count', { n: resultCount })}</Text>
+        </View>
+      </ScrollView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  wrap: { gap: 8 },
+  row: { paddingHorizontal: 14, gap: 8, alignItems: 'center' },
+  chip: {
+    paddingHorizontal: 14,
+    height: 32,
+    borderRadius: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: Colors.glass,
+    borderWidth: 1,
+    borderColor: Colors.glassBorder,
+  },
+  chipAccent: { borderColor: Colors.amber },
+  chipActive: { backgroundColor: Colors.amber, borderColor: Colors.amber },
+  chipText: { color: Colors.white, fontSize: 13, fontWeight: '600' },
+  chipTextActive: { color: Colors.navy, fontWeight: '800' },
+  segment: {
+    flexDirection: 'row',
+    height: 32,
+    borderRadius: 16,
+    padding: 2,
+    backgroundColor: Colors.glass,
+    borderWidth: 1,
+    borderColor: Colors.glassBorder,
+  },
+  segmentItem: { paddingHorizontal: 12, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  segmentActive: { backgroundColor: Colors.amber },
+  count: { paddingHorizontal: 6 },
+  countText: { color: Colors.textFaint, fontSize: 12, fontWeight: '600' },
+});
