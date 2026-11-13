@@ -3,7 +3,7 @@ import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { Heart, LogOut, MapPin, MessageCircle, Phone, Share2, UserRound } from 'lucide-react-native';
+import { Heart, MapPin, MessageCircle, Phone, Share2, UserRound } from 'lucide-react-native';
 import { callSeller, openWhatsApp, shareListing } from '../../components/ActionButtons';
 import CurrencySwitch from '../../components/CurrencySwitch';
 import { Colors } from '../../constants/colors';
@@ -21,16 +21,17 @@ export default function FavoritesScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { ids, toggle } = useFavorites();
-  const { user, requireAuth, signOut } = useAuth();
+  const { user, requireAuth } = useAuth();
   const { lang, t } = useLang();
   const { currency } = useCurrency();
-  const [listings, setListings] = useState<Listing[]>([]);
+  // null until loaded, so the empty state doesn't flash before the list arrives.
+  const [listings, setListings] = useState<Listing[] | null>(null);
 
   useEffect(() => {
     fetchListings().then(setListings);
   }, []);
 
-  const favorites = listings.filter((l) => ids.has(l.id));
+  const favorites = (listings ?? []).filter((l) => ids.has(l.id));
 
   return (
     <View style={[styles.container, { paddingTop: insets.top + 12 }]}>
@@ -39,34 +40,17 @@ export default function FavoritesScreen() {
         <CurrencySwitch />
       </View>
 
-      {user && (
-        <View style={styles.account}>
-          <View style={styles.avatar}>
-            <Text style={styles.initial}>{user.name.slice(0, 1).toUpperCase()}</Text>
-          </View>
-          <View style={styles.accountInfo}>
-            <Text style={styles.accountName} numberOfLines={1}>
-              {user.name}
-            </Text>
-            <Text style={styles.accountPhone}>+{user.phone}</Text>
-          </View>
-          <Pressable onPress={signOut} style={styles.signOut} hitSlop={8} accessibilityRole="button">
-            <LogOut size={16} color={Colors.textMuted} />
-            <Text style={styles.signOutText}>{t('auth.signOut')}</Text>
-          </Pressable>
-        </View>
-      )}
 
       {!user ? (
         <View style={styles.empty}>
           <UserRound size={52} color={Colors.textFaint} />
-          <Text style={styles.emptyTitle}>{t('auth.title')}</Text>
-          <Text style={styles.emptyText}>{t('fav.signInHint')}</Text>
+          <Text style={styles.emptyTitle}>{t('profile.guestTitle')}</Text>
+          <Text style={styles.emptyText}>{t('profile.guestText')}</Text>
           <Pressable style={styles.cta} onPress={() => requireAuth()} accessibilityRole="button">
-            <Text style={styles.ctaText}>{t('auth.submit')}</Text>
+            <Text style={styles.ctaText}>{t('auth.register')}</Text>
           </Pressable>
         </View>
-      ) : favorites.length === 0 ? (
+      ) : listings === null ? null : favorites.length === 0 ? (
         <View style={styles.empty}>
           <Heart size={52} color={Colors.textFaint} />
           <Text style={styles.emptyTitle}>{t('fav.emptyTitle')}</Text>
@@ -136,25 +120,6 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.navy },
   headingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingRight: 16 },
   heading: { color: Colors.white, fontSize: 28, fontWeight: '900', paddingHorizontal: 16 },
-  account: {
-    marginHorizontal: 16,
-    marginTop: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    backgroundColor: Colors.navyLight,
-    borderRadius: 16,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: Colors.glassBorder,
-  },
-  avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: Colors.amber, alignItems: 'center', justifyContent: 'center' },
-  initial: { color: Colors.navy, fontWeight: '900', fontSize: 18 },
-  accountInfo: { flex: 1 },
-  accountName: { color: Colors.white, fontWeight: '800', fontSize: 15 },
-  accountPhone: { color: Colors.textFaint, fontSize: 12 },
-  signOut: { flexDirection: 'row', alignItems: 'center', gap: 4, padding: 6 },
-  signOutText: { color: Colors.textMuted, fontSize: 12, fontWeight: '700' },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10, padding: 32 },
   emptyTitle: { color: Colors.white, fontSize: 18, fontWeight: '800' },
   emptyText: { color: Colors.textMuted, textAlign: 'center', lineHeight: 20 },

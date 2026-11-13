@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { favoritesKey } from '../constants/storage';
 import { useAuth } from './AuthContext';
 
 interface FavoritesValue {
@@ -10,10 +11,9 @@ interface FavoritesValue {
 }
 
 const FavoritesContext = createContext<FavoritesValue | null>(null);
-const keyFor = (phone: string) => `instahouse.favorites.v1.${phone}`;
 
 // Favourites belong to the signed-in user and are kept on the device.
-// Tapping a heart while signed out opens the sign-in sheet first, then applies.
+// Tapping a heart while signed out opens the registration sheet first, then applies.
 export function FavoritesProvider({ children }: { children: ReactNode }) {
   const { user, requireAuth } = useAuth();
   // The loaded list is tagged with its owner, so a stale list never shows for another user.
@@ -24,10 +24,17 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
   );
 
   useEffect(() => {
-    if (!user) return;
-    const phone = user.phone;
     let alive = true;
-    AsyncStorage.getItem(keyFor(phone))
+    if (!user) {
+      // Forget the in-memory list on sign-out / account deletion, so a re-registered
+      // account with the same phone starts from what is (not) on disk.
+      Promise.resolve().then(() => alive && setStore(null));
+      return () => {
+        alive = false;
+      };
+    }
+    const phone = user.phone;
+    AsyncStorage.getItem(favoritesKey(phone))
       .then((raw) => {
         if (!alive) return;
         const loaded = new Set(raw ? (JSON.parse(raw) as string[]) : []);
@@ -44,7 +51,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     (phone: string, fn: (prev: Set<string>) => Set<string>) => {
       setStore((prev) => {
         const next = fn(prev?.phone === phone ? prev.ids : new Set<string>());
-        AsyncStorage.setItem(keyFor(phone), JSON.stringify([...next])).catch(() => {});
+        AsyncStorage.setItem(favoritesKey(phone), JSON.stringify([...next])).catch(() => {});
         return { phone, ids: next };
       });
     },

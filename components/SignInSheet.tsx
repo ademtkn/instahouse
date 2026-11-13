@@ -1,75 +1,108 @@
 import { useState } from 'react';
-import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Heart, X } from 'lucide-react-native';
 import { Colors } from '../constants/colors';
 import { normalizePhone, useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LanguageContext';
 
-// Opened by requireAuth(): the first time someone taps a heart.
+export const MIN_PASSWORD = 4;
+
+// Opened by requireAuth(): the first time someone taps a heart, or from the
+// register buttons on the favourites / profile tabs.
 export default function SignInSheet() {
   const { sheetVisible, dismissSheet, signIn } = useAuth();
   const { t } = useLang();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('+996 ');
-  const [error, setError] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<'fields' | 'password' | null>(null);
 
   const submit = () => {
     const n = name.trim();
     const p = normalizePhone(phone);
-    if (n.length < 2 || p.length < 9) {
-      setError(true);
-      return;
-    }
-    setError(false);
-    signIn({ name: n, phone: p });
+    if (n.length < 2 || p.length < 9) return setError('fields');
+    if (password.length < MIN_PASSWORD) return setError('password');
+    setError(null);
+    signIn({ name: n, phone: p, email: email.trim() || undefined, password, notifications: true });
   };
 
   return (
     <Modal visible={sheetVisible} transparent animationType="fade" onRequestClose={dismissSheet}>
       <KeyboardAvoidingView style={styles.backdrop} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <Pressable style={StyleSheet.absoluteFill} onPress={dismissSheet} />
-        <View style={styles.sheet}>
-          <Pressable style={styles.close} onPress={dismissSheet} hitSlop={10} accessibilityLabel={t('auth.cancel')}>
-            <X size={20} color={Colors.textMuted} />
-          </Pressable>
-          <View style={styles.icon}>
-            <Heart size={26} color={Colors.white} fill={Colors.white} />
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          bounces={false}
+        >
+          <View style={styles.sheet}>
+            <Pressable style={styles.close} onPress={dismissSheet} hitSlop={10} accessibilityLabel={t('auth.cancel')}>
+              <X size={20} color={Colors.textMuted} />
+            </Pressable>
+            <View style={styles.icon}>
+              <Heart size={26} color={Colors.white} fill={Colors.white} />
+            </View>
+            <Text style={styles.title}>{t('auth.registerTitle')}</Text>
+            <Text style={styles.body}>{t('auth.registerText')}</Text>
+            <TextInput
+              style={styles.input}
+              placeholder={t('auth.name')}
+              placeholderTextColor={Colors.textFaint}
+              value={name}
+              onChangeText={setName}
+              autoCapitalize="words"
+              accessibilityLabel={t('auth.name')}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder={t('auth.phone')}
+              placeholderTextColor={Colors.textFaint}
+              value={phone}
+              onChangeText={setPhone}
+              keyboardType="phone-pad"
+              accessibilityLabel={t('auth.phone')}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder={t('auth.email')}
+              placeholderTextColor={Colors.textFaint}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              accessibilityLabel={t('auth.email')}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder={t('auth.password')}
+              placeholderTextColor={Colors.textFaint}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              autoCapitalize="none"
+              accessibilityLabel={t('auth.password')}
+            />
+            {error === 'fields' && <Text style={styles.error}>{t('auth.invalid')}</Text>}
+            {error === 'password' && <Text style={styles.error}>{t('auth.invalidPassword', { n: MIN_PASSWORD })}</Text>}
+            <Pressable style={styles.submit} onPress={submit} accessibilityRole="button">
+              <Text style={styles.submitText}>{t('auth.register')}</Text>
+            </Pressable>
+            <Pressable onPress={dismissSheet} hitSlop={8}>
+              <Text style={styles.later}>{t('auth.cancel')}</Text>
+            </Pressable>
           </View>
-          <Text style={styles.title}>{t('auth.title')}</Text>
-          <Text style={styles.body}>{t('auth.text')}</Text>
-          <TextInput
-            style={styles.input}
-            placeholder={t('auth.name')}
-            placeholderTextColor={Colors.textFaint}
-            value={name}
-            onChangeText={setName}
-            autoCapitalize="words"
-            accessibilityLabel={t('auth.name')}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder={t('auth.phone')}
-            placeholderTextColor={Colors.textFaint}
-            value={phone}
-            onChangeText={setPhone}
-            keyboardType="phone-pad"
-            accessibilityLabel={t('auth.phone')}
-          />
-          {error && <Text style={styles.error}>{t('auth.invalid')}</Text>}
-          <Pressable style={styles.submit} onPress={submit} accessibilityRole="button">
-            <Text style={styles.submitText}>{t('auth.submit')}</Text>
-          </Pressable>
-          <Pressable onPress={dismissSheet} hitSlop={8}>
-            <Text style={styles.later}>{t('auth.cancel')}</Text>
-          </Pressable>
-        </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', alignItems: 'center', justifyContent: 'center', padding: 24 },
+  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)' },
+  scroll: { flex: 1 },
+  scrollContent: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
   sheet: {
     width: '100%',
     maxWidth: 380,

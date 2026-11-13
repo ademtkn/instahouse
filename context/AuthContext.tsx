@@ -1,14 +1,16 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { USER_KEY, favoritesKey } from '../constants/storage';
 
-const KEY = 'instahouse.user.v1';
-
-// Phase 1 "account": a name and a phone number kept on the device. Its only
-// job is to own the favourites list. Phase 2 swaps this for Supabase auth
-// (SMS code) without changing the screens.
+// Phase 1 "account": kept on the device, no backend. Its only job is to own
+// the favourites list; everything else in the app works without it. Phase 2
+// swaps this for Supabase auth without changing the screens.
 export interface User {
   name: string;
   phone: string; // digits only, e.g. 996502001903
+  email?: string;
+  password: string; // stored locally for now; real auth comes with Supabase
+  notifications: boolean; // price drops on favourites, new listings (phase 2)
 }
 
 interface AuthValue {
@@ -16,8 +18,10 @@ interface AuthValue {
   ready: boolean;
   signIn: (u: User) => void;
   signOut: () => void;
-  // Run `then` now if signed in, otherwise open the sign-in sheet and run it after
-  // sign-in. The user is passed in because callers' closures predate the sign-in.
+  updateUser: (patch: Partial<User>) => void;
+  deleteAccount: () => void;
+  // Run `then` now if signed in, otherwise open the registration sheet and run it
+  // after sign-in. The user is passed in because callers' closures predate the sign-in.
   requireAuth: (then?: (u: User) => void) => void;
   sheetVisible: boolean;
   dismissSheet: () => void;
@@ -34,9 +38,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const pending = useRef<((u: User) => void) | null>(null);
 
   useEffect(() => {
-    AsyncStorage.getItem(KEY)
+    AsyncStorage.getItem(USER_KEY)
       .then((raw) => {
-        if (raw) setUser(JSON.parse(raw) as User);
+        // Accounts created before passwords/notifications existed get defaults.
+        if (raw) setUser({ password: '', notifications: true, ...(JSON.parse(raw) as Partial<User>) } as User);
       })
       .catch(() => {})
       .finally(() => setReady(true));
@@ -44,7 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = useCallback((u: User) => {
     setUser(u);
-    AsyncStorage.setItem(KEY, JSON.stringify(u)).catch(() => {});
+    AsyncStorage.setItem(USER_KEY, JSON.stringify(u)).catch(() => {});
     setSheetVisible(false);
     const then = pending.current;
     pending.current = null;
@@ -53,8 +58,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(() => {
     setUser(null);
-    AsyncStorage.removeItem(KEY).catch(() => {});
+    AsyncStorage.removeItem(USER_KEY).catch(() => {});
   }, []);
+
+  const updateUser = useCallback((patch: Partial<User>) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const next = { ...prev, ...patch };
+      AsyncStorage.setItem(USER_KEY, JSON.stringify(next)).catch(() => {});
+      return next;
+    });
+  }, []);
+
+  // Removes the account and the favourites stored under it on this device.
+  const deleteAccount = useCallback(() => {
+    if (user) AsyncStorage.removeItem(favoritesKey(user.phone)).catch(() => {});
+    setUser(null);
+    AsyncStorage.removeItem(USER_KEY).catch(() => {});
+  }, [user]);
 
   const requireAuth = useCallback(
     (then?: (u: User) => void) => {
@@ -74,8 +95,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<AuthValue>(
-    () => ({ user, ready, signIn, signOut, requireAuth, sheetVisible, dismissSheet }),
-    [user, ready, signIn, signOut, requireAuth, sheetVisible, dismissSheet],
+    () => ({ user, ready, signIn, signOut, updateUser, deleteAccount, requireAuth, sheetVisible, dismissSheet }),
+    [user, ready, signIn, signOut, updateUser, deleteAccount, requireAuth, sheetVisible, dismissSheet],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
