@@ -293,6 +293,9 @@ Gotchas:
   suite gained three "field is gone" checks and one message check (**59/59** pass); the APK was
   rebuilt, installed on the Poco and the form checked there (no Yapım yılı/Bina serisi/Durum;
   Belgeler and Eşya still present).
+- 2026-11-14 **Published** `gh-pages 733d959` from `main 6873595` (trimmed form); the live
+  `index.html` matches `dist/` (`__common-5fa0b662d06b71e14a0117b0407fc826.js`) and the live
+  form shows rooms/area/floor/documents/furniture but no year, series or condition.
 
 ## In progress / blocked
 
