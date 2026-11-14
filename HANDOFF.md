@@ -34,6 +34,14 @@ cd android && ANDROID_HOME=$HOME/Library/Android/sdk \
 
 - The release APK is signed with the generated **debug keystore**: local testing only, not
   store distribution. There is still no EAS project or `eas.json`.
+- Final 2026-11-14 APK (34 MB, arm64) was rebuilt after the `daysAgo` → `hoursAgo` refactor and
+  installed/verified on the Android 14 emulator. The Poco still has the 21:07 build: MIUI's
+  package installer rejected the update with "Uygulama yüklenmedi" on retry (the same
+  installer path that needed two attempts for the first install). The native code is
+  identical; the JS differs only by that demo-date helper.
+- The splash artwork was verified on the Android 14 emulator (house mark + "InstaHouse" +
+  amber rule on navy). On the MIUI Poco the cold start is too fast to capture and the system
+  launch animation takes over, so the captured frames show only the navy background.
 - `expo-navigation-bar` paints the system bar navy (`NavigationBar.setStyle('dark')`,
   plugin `enforceContrast: false`); verified on the Poco in 3-button mode.
 - The splash is the generated house mark on navy (`expo-splash-screen`, `imageWidth` 220).
@@ -72,8 +80,6 @@ Reference commits (Mashinam): `ed233be` (app-first pass), `196994c` (960 px imag
 
 Deliberate deviations:
 
-- `utils/time.ts#daysAgo` was **kept**: unlike Mashinam, InstaHouse's demo data still uses it,
-  so it is not dead code.
 - The demo catalogue stays in the original 8 cities. The `City` union, `constants/cities.ts`,
   `label.city` and the new city filter/form cover all 15; no listings were invented.
 - The Wikimedia 960 px thumbnail issue does not apply (local `public/media` files); only the
@@ -228,9 +234,9 @@ Gotchas:
     3 s. Removed `expo-image`'s `transition` from the card photo.
   - Android: `expo-navigation-bar` 58.0.4 + `NavigationBar.setStyle('dark')` + plugin
     `enforceContrast: false`, `utils/navigationBar(.android).ts`, centred 560 px tablet frame.
-  - Cleanup: removed `DemoContactModal`/`DEMO_MODE`, `isDefaultFilters`, `orange`, the unused
-    Wikimedia thumbnail helper; audited i18n keys (no unused) and StyleSheet keys (none
-    unused); all 16 media files referenced.
+  - Cleanup: removed `DemoContactModal`/`DEMO_MODE`, `isDefaultFilters`, `orange`, `daysAgo`,
+    the unused Wikimedia thumbnail helper; audited i18n keys (no unused) and StyleSheet keys
+    (none unused); all 16 media files referenced.
 - 2026-11-14 Verified: `npx tsc --noEmit` and `npx expo lint` pass; 48/48 Playwright checks on
   the exported web build (feed, no-password sign-in, demo OTP, stored user without password,
   like applied, profile, privacy/terms content without car terms, notifications flag, 15-city
@@ -243,6 +249,11 @@ Gotchas:
   https://ademtkn.github.io/instahouse/ serves `entry-42d2165af5afc4e7f6281d6a301b19c2.js`;
   a live Playwright pass confirmed the feed, the sign-in sheet, the legal sheet opened from
   the consent link, the `/legal/privacy` deep link (404.html fallback) and no console errors.
+- 2026-11-14 **Closed the last port deviation**: all 44 demo `daysAgo(n)` calls became
+  `hoursAgo(n * 24)` and the helper was deleted from `utils/time.ts` (identical dates).
+  `tsc`/lint pass, 48/48 web checks pass again, the release APK was rebuilt (arm64) and ran
+  on the Android 14 emulator, and the splash artwork was visually verified there. The web
+  build was republished from this source (see the publish bullet in the next entry).
 
 ## In progress / blocked
 
