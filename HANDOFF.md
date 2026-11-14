@@ -266,6 +266,9 @@ Gotchas:
   passes **55/55**; the release APK was rebuilt and checked on the Android 14 emulator
   (selecting Uzgen shows its land listing "Центр, Узген · 9 000 $"), and the web build was
   republished (see the publish bullet below).
+- 2026-11-14 **Published** `gh-pages 33418a9` from `main 6f31174`; the local and live
+  `index.html` now match (`__common-fb3cbfaaa94b356a20c4f095e314dfe4.js`) and a live
+  Playwright check selected Uzgen and found its 9 000 $ plot listing with no console errors.
 
 ## In progress / blocked
 
@@ -282,9 +285,9 @@ Gotchas:
   dark-mode APIs.
 - **Tablet:** the feed is a centred 560 px column on native tablets; a 2–3 column grid is still
   deferred.
-- **Demo supply:** 50 demo listings, all pointing at the test number; the 16 demo photos have
-  unconfirmed provenance; real admin listings and owner-shot vertical photos are needed before
-  store submission.
+- **Demo supply:** 50 demo listings spread across all 15 cities, all pointing at the test
+  number, with indicative regional prices; the 16 demo photos have unconfirmed provenance;
+  real admin listings and owner-shot vertical photos are needed before store submission.
 - **Admin contacts:** `ADMIN_CONTACTS.telegram` and `admin@instahouse.kg` are placeholders.
 - **Analytics/Sentry/Supabase/push** are not installed.
 - The GitHub Actions Pages workflow is still blocked by the account billing lock; publishing
