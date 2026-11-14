@@ -2,14 +2,13 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { USER_KEY, favoritesKey } from '../constants/storage';
 
-// Phase 1 "account": kept on the device, no backend. Its only job is to own
-// the favourites list; everything else in the app works without it. Phase 2
-// swaps this for Supabase auth without changing the screens.
+// Phase 1 "account": a name and a phone number kept on the device. Its only
+// job is to own the favourites list. Phase 2 swaps this for Supabase auth
+// (SMS code) without changing the screens.
 export interface User {
   name: string;
   phone: string; // digits only, e.g. 996502001903
   email?: string;
-  password: string; // stored locally for now; real auth comes with Supabase
   notifications: boolean; // price drops on favourites, new listings (phase 2)
 }
 
@@ -20,8 +19,8 @@ interface AuthValue {
   signOut: () => void;
   updateUser: (patch: Partial<User>) => void;
   deleteAccount: () => void;
-  // Run `then` now if signed in, otherwise open the registration sheet and run it
-  // after sign-in. The user is passed in because callers' closures predate the sign-in.
+  // Run `then` now if signed in, otherwise open the sign-in sheet and run it after
+  // sign-in. The user is passed in because callers' closures predate the sign-in.
   requireAuth: (then?: (u: User) => void) => void;
   sheetVisible: boolean;
   dismissSheet: () => void;
@@ -40,8 +39,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     AsyncStorage.getItem(USER_KEY)
       .then((raw) => {
-        // Accounts created before passwords/notifications existed get defaults.
-        if (raw) setUser({ password: '', notifications: true, ...(JSON.parse(raw) as Partial<User>) } as User);
+        if (!raw) return;
+        // Older builds stored a password field; it is ignored and never used.
+        const parsed = JSON.parse(raw) as Record<string, unknown>;
+        const phone = typeof parsed.phone === 'string' ? parsed.phone : '';
+        if (!phone) return;
+        const user: User = {
+          name: typeof parsed.name === 'string' && parsed.name.trim() ? parsed.name : 'InstaHouse',
+          phone,
+          email: typeof parsed.email === 'string' ? parsed.email : undefined,
+          notifications: typeof parsed.notifications === 'boolean' ? parsed.notifications : true,
+        };
+        setUser(user);
+        // Migrate old accounts: drop the legacy plaintext password from storage.
+        AsyncStorage.setItem(USER_KEY, JSON.stringify(user)).catch(() => {});
       })
       .catch(() => {})
       .finally(() => setReady(true));

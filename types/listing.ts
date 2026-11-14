@@ -1,7 +1,23 @@
 export type DealType = 'sale' | 'rent';
 // 'dacha' is the summer house sellers in Kyrgyzstan call дача (Turkish: yazlık ev, kır evi, bağ evi).
 export type PropertyType = 'apartment' | 'house' | 'dacha' | 'land' | 'commercial';
-export type City = 'Bişkek' | 'Oş' | 'Karakol' | 'Çolpon-Ata' | 'Celalabad' | 'Tokmok' | 'Narın' | 'Talas';
+// The 15 cities the feed covers, ordered roughly by market size (see constants/cities.ts).
+export type City =
+  | 'Bişkek'
+  | 'Oş'
+  | 'Celalabad'
+  | 'Karakol'
+  | 'Tokmok'
+  | 'Narın'
+  | 'Talas'
+  | 'Batken'
+  | 'Kara-Balta'
+  | 'Kant'
+  | 'Çolpon-Ata'
+  | 'Uzgen'
+  | 'Bazar-Korgon'
+  | 'Sülüktü'
+  | 'Kızıl-Kiya';
 // Renovation state. 'pso' = "под самоотделку": bare shell, the buyer finishes it.
 export type Condition = 'euro' | 'good' | 'cosmetic' | 'pso';
 // Title papers. 'redBook' = "красная книга" (registered title deed), 'ddu' = pre-sale
@@ -64,6 +80,7 @@ export type RoomsFilter = 'all' | '1' | '2' | '3' | '4+';
 export interface ListingFilters {
   dealType: DealType;
   type: PropertyType | null;
+  city: City | null; // null = all of Kyrgyzstan
   rooms: RoomsFilter;
   priceRange: PriceRangeId;
   onlyNew: boolean; // listed in the last 24 h, or price lowered

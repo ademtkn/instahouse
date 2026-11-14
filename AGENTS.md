@@ -50,9 +50,12 @@ where you stopped. Never record untested work as done.
 
 ## Current reference (2026-11-14)
 
-InstaHouse is at the pre-2026-11-14 Mashinam state. Before coding, read `HANDOFF.md` →
-**"Incoming port from Mashinam (2026-11-14)"**. Port the patterns, not the car content:
-keep `CurrencySwitch`/`CurrencyContext` (USD/som) and the real-estate fields (deal type,
-property type, rooms, area, floor, documents, condition, furnished). Do not copy the
-Mashinam car icon or its car-specific legal text. Reference commits: `ed233be`, `196994c`,
-`53f47a6`, `b6254ca`, `8e6d795`.
+The 2026-11-14 Mashinam port is **applied** — read `HANDOFF.md` for the current state and
+the "Incoming port … — APPLIED" section for what was ported and what was deliberately kept
+(`CurrencySwitch`/`CurrencyContext`, the real-estate fields, the 16 local demo photos).
+The patterns, not the car content, were ported: one-step phone + WhatsApp OTP demo
+(`LOCAL_AUTH_DEMO`), rewritten real-estate legal texts (company X), a structured admin
+listing form, 15 Kyrgyzstan cities, the 3 s seen threshold / reshuffle on refresh, the
+`expo-navigation-bar` fix and the tablet frame. The sibling rule still holds: changes that
+make sense for Mashinam should be mirrored there (and vice versa).
+Reference commits (Mashinam): `ed233be`, `196994c`, `53f47a6`, `b6254ca`, `8e6d795`.

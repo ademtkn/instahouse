@@ -1,17 +1,19 @@
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Bell, Heart, LogOut, Trash2, UserRound } from 'lucide-react-native';
-import { MIN_PASSWORD } from '../../components/SignInSheet';
+import { useRouter } from 'expo-router';
+import { Bell, ChevronRight, FileText, Heart, LogOut, Trash2, UserRound } from 'lucide-react-native';
 import { Colors } from '../../constants/colors';
 import { normalizePhone, useAuth } from '../../context/AuthContext';
 import { useFavorites } from '../../context/FavoritesContext';
 import { useLang } from '../../context/LanguageContext';
+import { formatPhone } from '../../utils/format';
 
 // Account settings. Everything is on-device until Supabase auth arrives;
 // the screen is written so only the storage layer needs to change.
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const { t } = useLang();
   const { user, requireAuth, signOut, updateUser, deleteAccount } = useAuth();
   const { ids } = useFavorites();
@@ -19,29 +21,25 @@ export default function ProfileScreen() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState<'fields' | 'password' | null>(null);
+  const [error, setError] = useState<'fields' | null>(null);
   const [saved, setSaved] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
-  // Reload the form whenever the account changes (sign-in, save, sign-out).
-  // `saved` is left alone here: a save changes `user` too, and the label must stay.
+  // Load the form from the account whenever it changes (sign-in, save, sign-out).
   useEffect(() => {
     const u = user;
     const id = setTimeout(() => {
       setName(u?.name ?? '');
-      setPhone(u ? `+${u.phone}` : '');
+      setPhone(u ? formatPhone(u.phone) : '');
       setEmail(u?.email ?? '');
-      setPassword('');
-      setError(null);
       setConfirmDelete(false);
-      if (!u) setSaved(false);
     }, 0);
     return () => clearTimeout(id);
   }, [user]);
 
-  const edit = (set: (v: string) => void) => (v: string) => {
-    set(v);
+  // Any edit after a save turns "Saved" back into "Save".
+  const edited = (setter: (v: string) => void) => (v: string) => {
+    setter(v);
     setSaved(false);
   };
 
@@ -49,10 +47,8 @@ export default function ProfileScreen() {
     const n = name.trim();
     const p = normalizePhone(phone);
     if (n.length < 2 || p.length < 9) return setError('fields');
-    if (password && password.length < MIN_PASSWORD) return setError('password');
     setError(null);
-    updateUser({ name: n, phone: p, email: email.trim() || undefined, ...(password ? { password } : {}) });
-    setPassword('');
+    updateUser({ name: n, phone: p, email: email.trim() || undefined });
     setSaved(true);
   };
 
@@ -66,6 +62,12 @@ export default function ProfileScreen() {
           <Text style={styles.emptyText}>{t('profile.guestText')}</Text>
           <Pressable style={styles.cta} onPress={() => requireAuth()} accessibilityRole="button">
             <Text style={styles.ctaText}>{t('auth.register')}</Text>
+          </Pressable>
+          <Pressable onPress={() => router.push('/legal/privacy')} hitSlop={8}>
+            <Text style={styles.guestLegal}>{t('legal.privacy')}</Text>
+          </Pressable>
+          <Pressable onPress={() => router.push('/legal/terms')} hitSlop={8}>
+            <Text style={styles.guestLegal}>{t('legal.terms')}</Text>
           </Pressable>
         </View>
       </View>
@@ -89,7 +91,7 @@ export default function ProfileScreen() {
             <Text style={styles.accountName} numberOfLines={1}>
               {user.name}
             </Text>
-            <Text style={styles.accountSub}>+{user.phone}</Text>
+            <Text style={styles.accountSub}>{formatPhone(user.phone)}</Text>
           </View>
           <View style={styles.favPill}>
             <Heart size={13} color={Colors.danger} fill={Colors.danger} />
@@ -100,12 +102,10 @@ export default function ProfileScreen() {
 
       <View style={styles.card}>
         <Text style={styles.cardTitle}>{t('profile.edit')}</Text>
-        <Field label={t('auth.name')} value={name} onChange={edit(setName)} />
-        <Field label={t('auth.phone')} value={phone} onChange={edit(setPhone)} keyboard="phone-pad" />
-        <Field label={t('auth.email')} value={email} onChange={edit(setEmail)} keyboard="email-address" />
-        <Field label={t('profile.newPassword')} value={password} onChange={edit(setPassword)} secure />
+        <Field label={t('auth.name')} value={name} onChange={edited(setName)} />
+        <Field label={t('auth.phone')} value={phone} onChange={edited(setPhone)} keyboard="phone-pad" />
+        <Field label={t('auth.email')} value={email} onChange={edited(setEmail)} keyboard="email-address" />
         {error === 'fields' && <Text style={styles.error}>{t('auth.invalid')}</Text>}
-        {error === 'password' && <Text style={styles.error}>{t('auth.invalidPassword', { n: MIN_PASSWORD })}</Text>}
         <Pressable style={styles.primary} onPress={save} accessibilityRole="button">
           <Text style={styles.primaryText}>{saved ? t('profile.saved') : t('profile.save')}</Text>
         </Pressable>
@@ -126,6 +126,32 @@ export default function ProfileScreen() {
           thumbColor={Colors.white}
           accessibilityLabel={t('profile.notifications')}
         />
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>{t('profile.legal')}</Text>
+        <Pressable
+          style={styles.legalRow}
+          onPress={() => router.push('/legal/privacy')}
+          accessibilityRole="button"
+        >
+          <View style={styles.iconBubble}>
+            <FileText size={18} color={Colors.amber} />
+          </View>
+          <Text style={[styles.rowTitle, styles.flex]}>{t('legal.privacy')}</Text>
+          <ChevronRight size={18} color={Colors.textFaint} />
+        </Pressable>
+        <Pressable
+          style={styles.legalRow}
+          onPress={() => router.push('/legal/terms')}
+          accessibilityRole="button"
+        >
+          <View style={styles.iconBubble}>
+            <FileText size={18} color={Colors.amber} />
+          </View>
+          <Text style={[styles.rowTitle, styles.flex]}>{t('legal.terms')}</Text>
+          <ChevronRight size={18} color={Colors.textFaint} />
+        </Pressable>
       </View>
 
       <Pressable style={[styles.card, styles.rowCard]} onPress={signOut} accessibilityRole="button">
@@ -171,13 +197,11 @@ function Field({
   value,
   onChange,
   keyboard,
-  secure,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   keyboard?: 'phone-pad' | 'email-address';
-  secure?: boolean;
 }) {
   return (
     <View style={styles.field}>
@@ -187,8 +211,7 @@ function Field({
         value={value}
         onChangeText={onChange}
         keyboardType={keyboard}
-        secureTextEntry={secure}
-        autoCapitalize={keyboard === 'email-address' || secure ? 'none' : 'words'}
+        autoCapitalize={keyboard === 'email-address' ? 'none' : 'words'}
         placeholderTextColor={Colors.textFaint}
         accessibilityLabel={label}
       />
@@ -207,6 +230,7 @@ const styles = StyleSheet.create({
   emptyText: { color: Colors.textMuted, textAlign: 'center', lineHeight: 20 },
   cta: { marginTop: 8, backgroundColor: Colors.amber, paddingHorizontal: 20, paddingVertical: 12, borderRadius: 14 },
   ctaText: { color: Colors.navy, fontWeight: '800' },
+  guestLegal: { color: Colors.amber, fontSize: 13, fontWeight: '700', textDecorationLine: 'underline', paddingVertical: 2 },
   card: {
     backgroundColor: Colors.navyLight,
     borderRadius: 18,
@@ -239,6 +263,7 @@ const styles = StyleSheet.create({
   primary: { height: 48, borderRadius: 14, backgroundColor: Colors.amber, alignItems: 'center', justifyContent: 'center', marginTop: 2 },
   primaryText: { color: Colors.navy, fontWeight: '900', fontSize: 15 },
   rowCard: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  legalRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 4 },
   rowCardInner: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   iconBubble: { width: 38, height: 38, borderRadius: 19, backgroundColor: Colors.navy, alignItems: 'center', justifyContent: 'center' },
   rowTitle: { color: Colors.white, fontWeight: '800', fontSize: 15 },

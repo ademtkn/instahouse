@@ -68,11 +68,14 @@ export function arrangeFeed(listings: Listing[], seen: Map<string, number>, pinn
   };
 }
 
-export const DEFAULT_FILTERS: ListingFilters = { dealType: 'sale', type: null, rooms: 'all', priceRange: 'all', onlyNew: false };
-
-export function isDefaultFilters(f: ListingFilters) {
-  return f.dealType === 'sale' && f.type === null && f.rooms === 'all' && f.priceRange === 'all' && !f.onlyNew;
-}
+export const DEFAULT_FILTERS: ListingFilters = {
+  dealType: 'sale',
+  type: null,
+  city: null,
+  rooms: 'all',
+  priceRange: 'all',
+  onlyNew: false,
+};
 
 // A shared listing may be a rental while the default filter is "sale"; the feed
 // switches to the deal type of the pinned listing so the link always shows it.
@@ -90,6 +93,7 @@ export function filterListings(listings: Listing[], filters: ListingFilters): Li
     (l) =>
       l.dealType === filters.dealType &&
       (!filters.type || l.type === filters.type) &&
+      (!filters.city || l.city === filters.city) &&
       roomsMatch(l.rooms, filters.rooms) &&
       l.priceUsd >= range.min &&
       l.priceUsd < range.max &&

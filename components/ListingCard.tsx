@@ -48,10 +48,6 @@ import FeedVideo from './FeedVideo';
 import SeenDivider, { SEEN_DIVIDER_HEIGHT } from './SeenDivider';
 import SellerRow from './SellerRow';
 
-// A tiny version of the photo is plenty for the blurred fill. Commons serves
-// fixed thumbnail widths (/1280px-), Flickr uses size suffixes (_b = 1024, _n = 320).
-const smallThumb = (uri: string) => uri.replace(/\/\d+px-/, '/330px-').replace(/_b\.jpg$/, '_n.jpg');
-
 const NATIVE_DRIVER = Platform.OS !== 'web';
 const DOUBLE_TAP_MS = 280;
 const GREEN = '#10B981';
@@ -194,7 +190,7 @@ function ListingCard({
           <Pressable onPress={handlePhotoPress} style={{ width, height }}>
             {/* Listing photos are landscape: blurred fill behind, whole room in front. */}
             <Image
-              source={{ uri: smallThumb(item.uri) }}
+              source={{ uri: item.uri }}
               style={StyleSheet.absoluteFill}
               contentFit="cover"
               blurRadius={28}
@@ -217,7 +213,6 @@ function ListingCard({
                 source={{ uri: item.uri }}
                 style={[StyleSheet.absoluteFill, !item.fullBleed && { bottom: height * 0.12 }]}
                 contentFit={item.fullBleed ? 'cover' : 'contain'}
-                transition={250}
                 cachePolicy="memory-disk"
               />
             )}
