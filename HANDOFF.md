@@ -239,6 +239,10 @@ Gotchas:
   arm64 release APK and tested it on the Poco X3 Pro: feed/spec rows, USD↔som, city modal,
   OTP sign-in, profile + legal pages, structured form preview and WhatsApp hand-off, navy
   3-button nav bar. `dist/` exported with `EXPO_BASE_URL=/instahouse` (16 media files).
+- 2026-11-14 **Published** `gh-pages 61b2ccd` from `main 498922e` and verified live:
+  https://ademtkn.github.io/instahouse/ serves `entry-42d2165af5afc4e7f6281d6a301b19c2.js`;
+  a live Playwright pass confirmed the feed, the sign-in sheet, the legal sheet opened from
+  the consent link, the `/legal/privacy` deep link (404.html fallback) and no console errors.
 
 ## In progress / blocked
 
