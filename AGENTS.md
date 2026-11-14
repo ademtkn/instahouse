@@ -25,7 +25,7 @@ Run lint and typecheck before declaring any task done.
 
 ## Navigation & Routing
 
-- Use **Expo Router** for all navigation. Routes live in `src/app/` — every file there is a screen, `_layout.tsx` files define navigators. Keep non-route code (components, hooks, utils) outside `src/app/`.
+- Use **Expo Router** for all navigation. Routes live in `app/` — every file there is a screen, `_layout.tsx` files define navigators. Keep non-route code (components, hooks, utils) outside `app/`.
 - Import `Link`, `router`, and `useLocalSearchParams` from `expo-router`.
 - Docs: https://docs.expo.dev/router/introduction.md
 
@@ -46,3 +46,13 @@ Docs: https://docs.expo.dev/eas/index.md
 **Read it before starting any task. When a task ends — or when you have to stop early (usage limit, error) —
 update its "Done log", "In progress / blocked" and "Next" sections** so the next assistant can continue exactly
 where you stopped. Never record untested work as done.
+
+
+## Current reference (2026-11-14)
+
+InstaHouse is at the pre-2026-11-14 Mashinam state. Before coding, read `HANDOFF.md` →
+**"Incoming port from Mashinam (2026-11-14)"**. Port the patterns, not the car content:
+keep `CurrencySwitch`/`CurrencyContext` (USD/som) and the real-estate fields (deal type,
+property type, rooms, area, floor, documents, condition, furnished). Do not copy the
+Mashinam car icon or its car-specific legal text. Reference commits: `ed233be`, `196994c`,
+`53f47a6`, `b6254ca`, `8e6d795`.
