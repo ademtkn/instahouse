@@ -252,8 +252,12 @@ Gotchas:
 - 2026-11-14 **Closed the last port deviation**: all 44 demo `daysAgo(n)` calls became
   `hoursAgo(n * 24)` and the helper was deleted from `utils/time.ts` (identical dates).
   `tsc`/lint pass, 48/48 web checks pass again, the release APK was rebuilt (arm64) and ran
-  on the Android 14 emulator, and the splash artwork was visually verified there. The web
-  build was republished from this source (see the publish bullet in the next entry).
+  on the Android 14 emulator, and the splash artwork was visually verified there.
+- 2026-11-14 **Republished** `gh-pages f13fb65` from `main b110e17` (the entry chunk did not
+  change, so the live `entry-42d2165af5afc4e7f6281d6a301b19c2.js` name stayed; the new feed
+  chunk `index-fec324dbf41c364d746c45807dc70de6.js` is live and `index.html` is byte-identical
+  to `dist/`). The Poco still has the 21:07 APK; MIUI rejected the update on retry, and the
+  rebuilt APK was verified on the Android 14 emulator instead.
 
 ## In progress / blocked
 
