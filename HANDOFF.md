@@ -59,7 +59,8 @@ cd android && ANDROID_HOME=$HOME/Library/Android/sdk \
 ### Device check (Poco X3 Pro, Android 12, 2026-11-14)
 
 Installed the standalone release APK and verified: feed with the real-estate spec rows
-(documents / condition / series / furniture), USD↔som switch, 15-city modal (Бишкек
+(then documents / condition / series / furniture; the card was trimmed on 2026-11-14 to
+documents / furniture), USD↔som switch, 15-city modal (Бишкек
 filter), one-step phone + demo WhatsApp code (name optional, no password/e-mail), profile
 (account, notifications, legal links, no password field), `/legal/privacy` page with the
 new real-estate text, the structured seller form (apartment 2 rooms, 58 m², 2019, 105
@@ -166,6 +167,10 @@ Gotchas:
   should review them.
 - Prices are stored in USD; the header switch shows USD or som (`SOM_PER_USD` in
   constants/config.ts, NBKR rate of 12 Nov 2026, update by hand). Rent prices are per month.
+- The card shows rooms, area, sotka, floor, documents and furniture. On the owner's request
+  (2026-11-14) the **year, condition and building-series** rows were removed from the card;
+  those fields are still collected by the listing form and included in the admin WhatsApp
+  message.
 - Listings expire **15 days** after `createdAt` (`LISTING_LIFETIME_DAYS`). Demo dates are
   relative to "now" and clamped ≤ 14 days.
 - Only the admin posts listings: the "Подать" tab is a **structured form** that composes a
@@ -269,6 +274,11 @@ Gotchas:
 - 2026-11-14 **Published** `gh-pages 33418a9` from `main 6f31174`; the local and live
   `index.html` now match (`__common-fb3cbfaaa94b356a20c4f095e314dfe4.js`) and a live
   Playwright check selected Uzgen and found its 9 000 $ plot listing with no console errors.
+- 2026-11-14 **Card trimmed** on the owner's request: the year, condition and building-series
+  rows left the listing card (documents and furniture stay) and `card.year` was removed from
+  RU/KY/TR. Verified with a pinned `?home=apt-07` card: no "2019 г.", "Евроремонт" or
+  "Элитка", while red book, furniture, floor and price remain; 55/55 web checks pass and the
+  release APK was rebuilt.
 
 ## In progress / blocked
 

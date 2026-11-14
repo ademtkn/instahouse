@@ -16,9 +16,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import {
   BedDouble,
-  Building,
   Building2,
-  CalendarDays,
   ChevronLeft,
   ChevronRight,
   Eye,
@@ -29,7 +27,6 @@ import {
   LandPlot,
   MapPin,
   Maximize2,
-  Paintbrush,
   Play,
   Share2,
   Sofa,
@@ -363,23 +360,14 @@ function ListingCard({
                   }
                 />
               )}
-              {listing.yearBuilt !== undefined && (
-                <Spec icon={<CalendarDays size={15} color={Colors.amber} />} value={t('card.year', { y: listing.yearBuilt })} />
-              )}
             </View>
-            {/* The things a buyer in KG asks first: papers, renovation, building series. */}
+            {/* Papers first; renovation, year and project were removed from the card on 2026-11-14. */}
             <View style={styles.specs}>
               <Spec
                 icon={<Doc.Icon size={15} color={Doc.color} />}
                 value={label.documents(lang, listing.documents)}
                 color={Doc.color}
               />
-              {listing.type !== 'land' && (
-                <Spec icon={<Paintbrush size={15} color={Colors.amber} />} value={label.condition(lang, listing.condition)} />
-              )}
-              {listing.series && (
-                <Spec icon={<Building size={15} color={Colors.amber} />} value={label.series(lang, listing.series)} />
-              )}
               {listing.type !== 'land' && listing.furnished && (
                 <Spec icon={<Sofa size={15} color={Colors.amber} />} value={t('card.furnished')} />
               )}
