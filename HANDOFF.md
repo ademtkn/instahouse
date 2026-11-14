@@ -34,11 +34,11 @@ cd android && ANDROID_HOME=$HOME/Library/Android/sdk \
 
 - The release APK is signed with the generated **debug keystore**: local testing only, not
   store distribution. There is still no EAS project or `eas.json`.
-- Final 2026-11-14 APK (34 MB, arm64) was rebuilt after the `daysAgo` → `hoursAgo` refactor and
-  installed/verified on the Android 14 emulator. The Poco still has the 21:07 build: MIUI's
-  package installer rejected the update with "Uygulama yüklenmedi" on retry (the same
-  installer path that needed two attempts for the first install). The native code is
-  identical; the JS differs only by that demo-date helper.
+- The 2026-11-14 APKs (34 MB, arm64) were rebuilt after each JS change and verified on the
+  Android 14 emulator. The latest build (trimmed card + 15-city demo data) is also installed
+  on the Poco: after the earlier MIUI "Uygulama yüklenmedi" failures, a plain `adb install -r`
+  succeeded, and the Russian card there shows documents/furniture but no year, condition or
+  series.
 - The splash artwork was verified on the Android 14 emulator (house mark + "InstaHouse" +
   amber rule on navy). On the MIUI Poco the cold start is too fast to capture and the system
   launch animation takes over, so the captured frames show only the navy background.
@@ -262,8 +262,8 @@ Gotchas:
 - 2026-11-14 **Republished** `gh-pages f13fb65` from `main b110e17` (the entry chunk did not
   change, so the live `entry-42d2165af5afc4e7f6281d6a301b19c2.js` name stayed; the new feed
   chunk `index-fec324dbf41c364d746c45807dc70de6.js` is live and `index.html` is byte-identical
-  to `dist/`). The Poco still has the 21:07 APK; MIUI rejected the update on retry, and the
-  rebuilt APK was verified on the Android 14 emulator instead.
+  to `dist/`). At that point the Poco still had the 21:07 APK (MIUI rejected the update on
+  retry), so the rebuilt APK was verified on the Android 14 emulator instead.
 - 2026-11-14 **Spread the demo catalogue across all 15 cities**: seven existing listings
   moved to Batken, Kara-Balta, Kant, Uzgen, Bazar-Korgon, Sülüktü and Kızıl-Kiya with
   indicative regional prices; the 50-listing mix (13/13/12/12) is unchanged and every earlier
@@ -277,8 +277,12 @@ Gotchas:
 - 2026-11-14 **Card trimmed** on the owner's request: the year, condition and building-series
   rows left the listing card (documents and furniture stay) and `card.year` was removed from
   RU/KY/TR. Verified with a pinned `?home=apt-07` card: no "2019 г.", "Евроремонт" or
-  "Элитка", while red book, furniture, floor and price remain; 55/55 web checks pass and the
-  release APK was rebuilt.
+  "Элитка", while red book, furniture, floor and price remain; 55/55 web checks pass. The
+  release APK was rebuilt, installed on the Poco and the same card checked there in Russian.
+- 2026-11-14 **Published** `gh-pages 1f943ae` from `main e7bfc3a` (trimmed card). The live
+  `index.html` matches `dist/` (`__common-e254754e79a96afb29ff733643918afd.js`) and a live
+  Playwright check on `?home=apt-07` confirmed the year/condition/series rows are gone while
+  the red book, furniture, floor and price remain.
 
 ## In progress / blocked
 
