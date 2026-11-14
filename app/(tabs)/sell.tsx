@@ -34,15 +34,13 @@ import { label } from '../../constants/i18n';
 import { useAuth } from '../../context/AuthContext';
 import { useCurrency } from '../../context/CurrencyContext';
 import { useLang } from '../../context/LanguageContext';
-import type { City, Condition, DealType, Documents, PropertyType, SellerType, Series } from '../../types/listing';
+import type { City, DealType, Documents, PropertyType, SellerType } from '../../types/listing';
 import { formatArea, formatPhone, formatSotka, priceLabel } from '../../utils/format';
 import { fullKgPhone, isValidKgPhone } from '../../utils/phone';
 
 const DEAL_TYPES: DealType[] = ['sale', 'rent'];
 const PROPERTY_TYPES: PropertyType[] = ['apartment', 'house', 'dacha', 'land', 'commercial'];
-const CONDITIONS: Condition[] = ['euro', 'good', 'cosmetic', 'pso'];
 const DOCUMENT_OPTIONS: Documents[] = ['redBook', 'ddu', 'none'];
-const SERIES_OPTIONS: Series[] = ['104', '105', '106', 'elite', 'khrushchevka', 'stalinka', 'individual'];
 const SELLER_TYPES: SellerType[] = ['owner', 'agent'];
 
 type FormError = 'fields' | 'details' | 'phone' | 'consent' | 'open' | null;
@@ -64,9 +62,6 @@ export default function SellScreen() {
   const [sotka, setSotka] = useState('');
   const [floor, setFloor] = useState('');
   const [totalFloors, setTotalFloors] = useState('');
-  const [year, setYear] = useState('');
-  const [series, setSeries] = useState<Series | null>(null);
-  const [condition, setCondition] = useState<Condition | null>(null);
   const [documents, setDocuments] = useState<Documents | null>(null);
   const [furnished, setFurnished] = useState(false);
   const [city, setCity] = useState<City | null>(null);
@@ -93,8 +88,7 @@ export default function SellScreen() {
   const showRooms = type === 'apartment' || type === 'house' || type === 'dacha';
   const showSotka = type === 'house' || type === 'dacha' || type === 'land';
   const showFloor = type === 'apartment' || type === 'commercial';
-  const showCondition = type !== null && type !== 'land';
-  const showSeries = type === 'apartment';
+  const showFurniture = type !== null && type !== 'land';
   const isLand = type === 'land';
   const roomChips = type === 'apartment' ? [0, 1, 2, 3, 4] : [1, 2, 3, 4];
 
@@ -119,11 +113,8 @@ export default function SellScreen() {
       `Площадь: ${areaNum > 0 ? formatArea(areaNum) : '—'}`,
       `Участок: ${showSotka && sotkaNum > 0 ? formatSotka(sotkaNum, lang) : '—'}`,
       `Этаж: ${floorText}`,
-      `Год: ${year.trim() || '—'}`,
-      `Серия: ${showSeries && series ? label.series(lang, series) : '—'}`,
-      `Состояние: ${showCondition && condition ? label.condition(lang, condition) : '—'}`,
       `Документы: ${documents ? label.documents(lang, documents) : '—'}`,
-      `Мебель: ${showCondition ? (furnished ? t('sell.furnishedYes') : t('sell.furnishedNo')) : '—'}`,
+      `Мебель: ${showFurniture ? (furnished ? t('sell.furnishedYes') : t('sell.furnishedNo')) : '—'}`,
       `Город: ${city ? label.city(lang, city) : '—'}`,
       `Район: ${district.trim() || '—'}`,
       `Цена: ${
@@ -141,7 +132,6 @@ export default function SellScreen() {
   }, [
     areaNum,
     city,
-    condition,
     dealType,
     district,
     documents,
@@ -151,17 +141,14 @@ export default function SellScreen() {
     priceNum,
     rooms,
     sellerType,
-    series,
-    showCondition,
     showFloor,
     showRooms,
-    showSeries,
+    showFurniture,
     showSotka,
     sotkaNum,
     t,
     totalFloors,
     type,
-    year,
     phone,
   ]);
 
@@ -170,17 +157,12 @@ export default function SellScreen() {
     if (!areaNum || areaNum <= 0) return 'fields';
     if (!priceNum || priceNum <= 0) return 'fields';
     if (!city) return 'fields';
-    const yearNum = Number(year);
-    if (year.trim() && (!Number.isInteger(yearNum) || yearNum < 1900 || yearNum > new Date().getFullYear() + 2)) {
-      return 'fields';
-    }
     if (showFloor && floor.trim() && (!Number.isInteger(Number(floor)) || Number(floor) < 1)) return 'fields';
     if (showFloor && totalFloors.trim() && (!Number.isInteger(Number(totalFloors)) || Number(totalFloors) < 1)) {
       return 'fields';
     }
     if (showRooms && rooms === null) return 'details';
     if (isLand && !sotkaNum) return 'details';
-    if (showCondition && !condition) return 'details';
     if (!documents) return 'details';
     if (!sellerType) return 'details';
     if (!isValidKgPhone(phone)) return 'phone';
@@ -354,57 +336,6 @@ export default function SellScreen() {
             </View>
           )}
 
-          <View style={styles.row}>
-            <Field
-              label={t('sell.year')}
-              value={year}
-              onChangeText={(v) => {
-                setYear(v);
-                setError(null);
-              }}
-              keyboard="number-pad"
-              placeholder="2019"
-              maxLength={4}
-              style={styles.flex}
-            />
-          </View>
-
-          {showSeries && (
-            <>
-              <Text style={styles.label}>{t('sell.series')}</Text>
-              <View style={styles.chips}>
-                {SERIES_OPTIONS.map((s) => (
-                  <OptionChip
-                    key={s}
-                    label={label.series(lang, s)}
-                    active={series === s}
-                    onPress={() => setSeries(series === s ? null : s)}
-                  />
-                ))}
-              </View>
-              <Text style={styles.hint}>{t('sell.seriesHint')}</Text>
-            </>
-          )}
-
-          {showCondition && (
-            <>
-              <Text style={styles.label}>{t('sell.condition')}</Text>
-              <View style={styles.chips}>
-                {CONDITIONS.map((c) => (
-                  <OptionChip
-                    key={c}
-                    label={label.condition(lang, c)}
-                    active={condition === c}
-                    onPress={() => {
-                      setCondition(condition === c ? null : c);
-                      setError(null);
-                    }}
-                  />
-                ))}
-              </View>
-            </>
-          )}
-
           <Text style={styles.label}>{t('sell.documents')}</Text>
           <View style={styles.chips}>
             {DOCUMENT_OPTIONS.map((d) => (
@@ -420,7 +351,7 @@ export default function SellScreen() {
             ))}
           </View>
 
-          {showCondition && (
+          {showFurniture && (
             <>
               <Text style={styles.label}>{t('sell.furnished')}</Text>
               <View style={styles.chips}>
@@ -696,7 +627,6 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: 8 },
   field: { gap: 5 },
   label: { color: Colors.textMuted, fontSize: 12, fontWeight: '700', marginTop: 2 },
-  hint: { color: Colors.textFaint, fontSize: 11, marginTop: -4 },
   input: {
     height: 46,
     borderRadius: 12,

@@ -168,9 +168,11 @@ Gotchas:
 - Prices are stored in USD; the header switch shows USD or som (`SOM_PER_USD` in
   constants/config.ts, NBKR rate of 12 Nov 2026, update by hand). Rent prices are per month.
 - The card shows rooms, area, sotka, floor, documents and furniture. On the owner's request
-  (2026-11-14) the **year, condition and building-series** rows were removed from the card;
-  those fields are still collected by the listing form and included in the admin WhatsApp
-  message.
+  (2026-11-14) the **year, condition and building-series** rows were removed from the card,
+  and later the same day the three fields were removed from the listing form and from its
+  WhatsApp message too. The `Listing` type and demo data still carry `condition`/`series`
+  values, but nothing in the UI reads or asks for them; drop them from the type/data when the
+  admin tool/schema is built (or restore the fields if they are wanted again).
 - Listings expire **15 days** after `createdAt` (`LISTING_LIFETIME_DAYS`). Demo dates are
   relative to "now" and clamped ≤ 14 days.
 - Only the admin posts listings: the "Подать" tab is a **structured form** that composes a
@@ -283,6 +285,14 @@ Gotchas:
   `index.html` matches `dist/` (`__common-e254754e79a96afb29ff733643918afd.js`) and a live
   Playwright check on `?home=apt-07` confirmed the year/condition/series rows are gone while
   the red book, furniture, floor and price remain.
+- 2026-11-14 **Seller form trimmed** at the owner's request: the year, condition and
+  building-series inputs (and the series hint) were removed, the composed WhatsApp message no
+  longer contains "Год/Серия/Состояние", and the now-unused `sell.*` strings plus the
+  `label.condition`/`label.series` maps were deleted. Rooms, area/sotka, floor, documents,
+  furniture, city/district, price, seller type, phone and the two consents stay. The Playwright
+  suite gained three "field is gone" checks and one message check (**59/59** pass); the APK was
+  rebuilt, installed on the Poco and the form checked there (no Yapım yılı/Bina serisi/Durum;
+  Belgeler and Eşya still present).
 
 ## In progress / blocked
 

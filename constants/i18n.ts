@@ -1,4 +1,4 @@
-import type { City, Condition, DealType, Documents, PropertyType, SellerType, Series } from '../types/listing';
+import type { City, DealType, Documents, PropertyType, SellerType } from '../types/listing';
 
 // Russian is the everyday language of property deals in Kyrgyzstan, so it's the
 // default; Kyrgyz and Turkish are one tap away. The Kyrgyz strings were
@@ -112,10 +112,6 @@ const STRINGS = {
     'sell.landSotka': 'Участок, сот.',
     'sell.floor': 'Этаж',
     'sell.totalFloors': 'Этажей в доме',
-    'sell.year': 'Год постройки',
-    'sell.series': 'Серия дома',
-    'sell.seriesHint': 'Необязательно — если знаете серию дома.',
-    'sell.condition': 'Состояние',
     'sell.documents': 'Документы',
     'sell.furnished': 'Мебель',
     'sell.furnishedYes': 'С мебелью',
@@ -133,7 +129,7 @@ const STRINGS = {
     'sell.consent':
       'Я согласен на публикацию моего телефона/WhatsApp в объявлении; покупатели и арендаторы смогут связаться со мной.',
     'sell.formInvalid': 'Укажите тип объекта, площадь, цену и город.',
-    'sell.details': 'Выберите комнаты, состояние, документы и тип продавца.',
+    'sell.details': 'Выберите комнаты, документы и тип продавца.',
     'sell.consentRequired': 'Отметьте согласие на публикацию телефона',
     'sell.openError': 'Не удалось открыть WhatsApp. Попробуйте ещё раз.',
     'sell.preview': 'Проверить сообщение',
@@ -247,10 +243,6 @@ const STRINGS = {
     'sell.landSotka': 'Тилке, сот.',
     'sell.floor': 'Кабаты',
     'sell.totalFloors': 'Үйдүн кабат саны',
-    'sell.year': 'Курулган жылы',
-    'sell.series': 'Үйдүн сериясы',
-    'sell.seriesHint': 'Милдеттүү эмес — үйдүн сериясын билсеңиз.',
-    'sell.condition': 'Абалы',
     'sell.documents': 'Документтер',
     'sell.furnished': 'Эмерек',
     'sell.furnishedYes': 'Эмереги менен',
@@ -268,7 +260,7 @@ const STRINGS = {
     'sell.consent':
       "Телефонумдун/WhatsApp'ымдын жарыяда көрсөтүлүшүнө макулмун; сатып алуучулар жана ижарага алуучулар мени менен байланыша алат.",
     'sell.formInvalid': 'Объект түрүн, аянтын, баасын жана шаарын жазыңыз.',
-    'sell.details': 'Бөлмөлөрдү, абалын, документтерди жана сатуучу түрүн тандаңыз.',
+    'sell.details': 'Бөлмөлөрдү, документтерди жана сатуучу түрүн тандаңыз.',
     'sell.consentRequired': 'Телефонду жарыялоого макулдукту белгилеңиз',
     'sell.openError': 'WhatsApp ачылбады. Кайра аракет кылыңыз.',
     'sell.preview': 'Билдирүүнү текшерүү',
@@ -382,10 +374,6 @@ const STRINGS = {
     'sell.landSotka': 'Arsa (sotka)',
     'sell.floor': 'Kat',
     'sell.totalFloors': 'Bina kat sayısı',
-    'sell.year': 'Yapım yılı',
-    'sell.series': 'Bina serisi',
-    'sell.seriesHint': 'İsteğe bağlı — bina serisini biliyorsanız.',
-    'sell.condition': 'Durum',
     'sell.documents': 'Belgeler',
     'sell.furnished': 'Eşya',
     'sell.furnishedYes': 'Eşyalı',
@@ -403,7 +391,7 @@ const STRINGS = {
     'sell.consent':
       'Telefon/WhatsApp numaramın ilanda herkese açık gösterilmesine izin veriyorum; alıcılar ve kiracılar benimle iletişime geçebilir.',
     'sell.formInvalid': 'Mülk türü, metrekare, fiyat ve şehri yaz.',
-    'sell.details': 'Oda sayısı, durum, belgeler ve satıcı türünü seç.',
+    'sell.details': 'Oda sayısı, belgeler ve satıcı türünü seç.',
     'sell.consentRequired': 'Telefonun yayınlanmasına onay ver',
     'sell.openError': 'WhatsApp açılamadı. Tekrar dene.',
     'sell.preview': 'Mesajı önizle',
@@ -435,44 +423,10 @@ const TYPE: Record<Lang, Record<PropertyType, string>> = {
   ky: { apartment: 'Батирлер', house: 'Үйлөр', dacha: 'Дачалар', land: 'Жер', commercial: 'Коммерциялык' },
   tr: { apartment: 'Daireler', house: 'Evler', dacha: 'Yazlık ev', land: 'Arsalar', commercial: 'Ticari' },
 };
-const CONDITION: Record<Lang, Record<Condition, string>> = {
-  ru: { euro: 'Евроремонт', good: 'Хорошее состояние', cosmetic: 'Косметический ремонт', pso: 'ПСО' },
-  ky: { euro: 'Евроремонт', good: 'Жакшы абалда', cosmetic: 'Косметикалык ремонт', pso: 'ПСО' },
-  tr: { euro: 'Lüks tadilat', good: 'İyi durumda', cosmetic: 'Kozmetik tadilat', pso: 'Kaba inşaat' },
-};
 const DOCUMENTS: Record<Lang, Record<Documents, string>> = {
   ru: { redBook: 'Красная книга', ddu: 'ДДУ', none: 'Без документов' },
   ky: { redBook: 'Кызыл китеп', ddu: 'ДДУ', none: 'Документсиз' },
   tr: { redBook: 'Tapulu', ddu: 'Müteahhit sözleşmesi', none: 'Tapusuz' },
-};
-const SERIES: Record<Lang, Record<Series, string>> = {
-  ru: {
-    '104': '104 серия',
-    '105': '105 серия',
-    '106': '106 серия',
-    elite: 'Элитка',
-    khrushchevka: 'Хрущёвка',
-    stalinka: 'Сталинка',
-    individual: 'Индивид. проект',
-  },
-  ky: {
-    '104': '104 сериясы',
-    '105': '105 сериясы',
-    '106': '106 сериясы',
-    elite: 'Элитка',
-    khrushchevka: 'Хрущёвка',
-    stalinka: 'Сталинка',
-    individual: 'Жеке долбоор',
-  },
-  tr: {
-    '104': '104 serisi',
-    '105': '105 serisi',
-    '106': '106 serisi',
-    elite: 'Elit site',
-    khrushchevka: 'Kruşçevka',
-    stalinka: 'Stalinka',
-    individual: 'Özel proje',
-  },
 };
 const SELLER: Record<Lang, Record<SellerType, string>> = {
   ru: { owner: 'Собственник', agent: 'Агент' },
@@ -536,9 +490,7 @@ const CITY: Record<Lang, Record<City, string>> = {
 export const label = {
   dealType: (lang: Lang, v: DealType) => DEAL[lang][v],
   type: (lang: Lang, v: PropertyType) => TYPE[lang][v],
-  condition: (lang: Lang, v: Condition) => CONDITION[lang][v],
   documents: (lang: Lang, v: Documents) => DOCUMENTS[lang][v],
-  series: (lang: Lang, v: Series) => SERIES[lang][v],
   sellerType: (lang: Lang, v: SellerType) => SELLER[lang][v],
   city: (lang: Lang, v: City) => CITY[lang][v],
 };
