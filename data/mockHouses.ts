@@ -3,8 +3,11 @@ import { mediaUrl } from '../utils/media';
 import { hoursAgo } from '../utils/time';
 
 // Demo catalogue: 13 apartments, 13 houses, 12 plots, 12 dachas (дачи / yazlık ev).
-// Prices, series and districts follow the Kyrgyz market. Every number is the
-// test line from constants/config.ts, so the call buttons stay safe to try.
+// At least one listing sits in each of the 15 cities in constants/cities.ts, so
+// every city chip in the filter and the seller form has something to show.
+// Prices are indicative regional demo numbers, not a market survey; series and
+// districts follow the Kyrgyz market. Every number is the test line from
+// constants/config.ts, so the call buttons stay safe to try.
 const PHONE = '+996502001903';
 
 const shots = (...files: string[]): Photo[] => files.map((file) => ({ uri: mediaUrl(file) }));
@@ -43,7 +46,7 @@ export const mockHouses: Listing[] = [
   ad({
     id: 'apt-03', dealType: 'sale', type: 'apartment', rooms: 1, areaM2: 34, floor: 3, totalFloors: 5,
     yearBuilt: 1974, series: 'khrushchevka', condition: 'cosmetic', documents: 'redBook', furnished: false,
-    priceUsd: 41000, city: 'Bişkek', district: '7 мкр',
+    priceUsd: 27000, city: 'Kara-Balta', district: 'Микрорайон',
     views: 1210, likes: 44, photos: khr, sellerName: 'Сергей Ким', sellerType: 'agent', createdAt: hoursAgo(6 * 24),
   }),
   ad({
@@ -129,13 +132,13 @@ export const mockHouses: Listing[] = [
   ad({
     id: 'house-04', dealType: 'sale', type: 'house', rooms: 5, areaM2: 160, landSotka: 8,
     yearBuilt: 2009, series: 'individual', condition: 'cosmetic', documents: 'redBook', furnished: false,
-    priceUsd: 62000, city: 'Oş', district: 'Курманжан Датка',
+    priceUsd: 45000, city: 'Batken', district: 'Центр',
     views: 480, likes: 22, photos: yard, sellerName: 'Махабат Токтогулова', sellerType: 'owner', createdAt: hoursAgo(10 * 24),
   }),
   ad({
     id: 'house-05', dealType: 'sale', type: 'house', rooms: 4, areaM2: 130, landSotka: 7,
     yearBuilt: 2004, series: 'individual', condition: 'good', documents: 'redBook', furnished: false,
-    priceUsd: 48000, city: 'Karakol', district: 'Геологоразведка',
+    priceUsd: 32000, city: 'Sülüktü', district: 'Центр',
     views: 260, likes: 14, photos: brick, sellerName: 'Дмитрий Орлов', sellerType: 'owner', createdAt: hoursAgo(7 * 24),
   }),
   ad({
@@ -227,25 +230,25 @@ export const mockHouses: Listing[] = [
   ad({
     id: 'land-07', dealType: 'sale', type: 'land', rooms: 0, areaM2: 600, landSotka: 6,
     condition: 'good', documents: 'redBook', furnished: false,
-    priceUsd: 15000, city: 'Oş', district: 'Нариман',
+    priceUsd: 9000, city: 'Uzgen', district: 'Центр',
     views: 180, likes: 7, photos: valley, sellerName: 'Улугбек Рахимов', sellerType: 'owner', createdAt: hoursAgo(8 * 24),
   }),
   ad({
     id: 'land-08', dealType: 'sale', type: 'land', rooms: 0, areaM2: 1200, landSotka: 12,
     condition: 'good', documents: 'redBook', furnished: false,
-    priceUsd: 18000, city: 'Celalabad', district: 'Пригород',
+    priceUsd: 11000, city: 'Bazar-Korgon', district: 'Центр',
     views: 150, likes: 4, photos: valley, sellerName: 'Мирлан Жолдошев', sellerType: 'owner', createdAt: hoursAgo(12 * 24),
   }),
   ad({
     id: 'land-09', dealType: 'sale', type: 'land', rooms: 0, areaM2: 800, landSotka: 8,
     condition: 'good', documents: 'redBook', furnished: false,
-    priceUsd: 32000, city: 'Karakol', district: 'Григорьевка',
+    priceUsd: 12000, city: 'Kızıl-Kiya', district: 'Центр',
     views: 240, likes: 13, photos: shore, sellerName: 'Виктор Назаров', sellerType: 'owner', createdAt: hoursAgo(3 * 24),
   }),
   ad({
     id: 'land-10', dealType: 'sale', type: 'land', rooms: 0, areaM2: 600, landSotka: 6,
     condition: 'good', documents: 'none', furnished: false,
-    priceUsd: 12000, city: 'Tokmok', district: 'Кант, садовое общество',
+    priceUsd: 14000, city: 'Kant', district: 'Садовое общество',
     views: 95, likes: 3, photos: chuy, sellerName: 'Чолпон Абдыкадырова', sellerType: 'owner', createdAt: hoursAgo(14 * 24),
   }),
   ad({

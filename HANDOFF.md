@@ -80,8 +80,9 @@ Reference commits (Mashinam): `ed233be` (app-first pass), `196994c` (960 px imag
 
 Deliberate deviations:
 
-- The demo catalogue stays in the original 8 cities. The `City` union, `constants/cities.ts`,
-  `label.city` and the new city filter/form cover all 15; no listings were invented.
+- The demo catalogue is spread across all 15 cities with **indicative** regional prices, so
+  every city chip has something to show. These are sample numbers, not a market survey; the
+  owner should replace them with real listings.
 - The Wikimedia 960 px thumbnail issue does not apply (local `public/media` files); only the
   `expo-image` transition was removed for the release-only invisible-photo bug.
 - No iOS build was attempted.
@@ -258,6 +259,13 @@ Gotchas:
   chunk `index-fec324dbf41c364d746c45807dc70de6.js` is live and `index.html` is byte-identical
   to `dist/`). The Poco still has the 21:07 APK; MIUI rejected the update on retry, and the
   rebuilt APK was verified on the Android 14 emulator instead.
+- 2026-11-14 **Spread the demo catalogue across all 15 cities**: seven existing listings
+  moved to Batken, Kara-Balta, Kant, Uzgen, Bazar-Korgon, Sülüktü and Kızıl-Kiya with
+  indicative regional prices; the 50-listing mix (13/13/12/12) is unchanged and every earlier
+  city kept at least one listing. The Playwright suite gained one check per new city and now
+  passes **55/55**; the release APK was rebuilt and checked on the Android 14 emulator
+  (selecting Uzgen shows its land listing "Центр, Узген · 9 000 $"), and the web build was
+  republished (see the publish bullet below).
 
 ## In progress / blocked
 
