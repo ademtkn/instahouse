@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Bell, ChevronRight, FileText, Heart, LogOut, Trash2, UserRound } from 'lucide-react-native';
+import { Bell, ChevronRight, FileText, Heart, LogOut, ShieldCheck, Trash2, UserRound } from 'lucide-react-native';
 import { Colors } from '../../constants/colors';
 import { normalizePhone, useAuth } from '../../context/AuthContext';
 import { useFavorites } from '../../context/FavoritesContext';
@@ -68,6 +68,9 @@ export default function ProfileScreen() {
           </Pressable>
           <Pressable onPress={() => router.push('/legal/terms')} hitSlop={8}>
             <Text style={styles.guestLegal}>{t('legal.terms')}</Text>
+          </Pressable>
+          <Pressable onPress={() => router.push('/admin')} hitSlop={8}>
+            <Text style={styles.guestAdmin}>{t('admin.title')}</Text>
           </Pressable>
         </View>
       </View>
@@ -154,6 +157,18 @@ export default function ProfileScreen() {
         </Pressable>
       </View>
 
+      <Pressable
+        style={[styles.card, styles.rowCard]}
+        onPress={() => router.push('/admin')}
+        accessibilityRole="button"
+      >
+        <View style={styles.iconBubble}>
+          <ShieldCheck size={18} color={Colors.amber} />
+        </View>
+        <Text style={[styles.rowTitle, styles.flex]}>{t('admin.title')}</Text>
+        <ChevronRight size={18} color={Colors.textFaint} />
+      </Pressable>
+
       <Pressable style={[styles.card, styles.rowCard]} onPress={signOut} accessibilityRole="button">
         <View style={styles.iconBubble}>
           <LogOut size={18} color={Colors.white} />
@@ -231,6 +246,7 @@ const styles = StyleSheet.create({
   cta: { marginTop: 8, backgroundColor: Colors.amber, paddingHorizontal: 20, paddingVertical: 12, borderRadius: 14 },
   ctaText: { color: Colors.navy, fontWeight: '800' },
   guestLegal: { color: Colors.amber, fontSize: 13, fontWeight: '700', textDecorationLine: 'underline', paddingVertical: 2 },
+  guestAdmin: { color: Colors.textFaint, fontSize: 12, fontWeight: '600', paddingVertical: 2, marginTop: 6 },
   card: {
     backgroundColor: Colors.navyLight,
     borderRadius: 18,

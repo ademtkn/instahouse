@@ -8,6 +8,12 @@ export const LISTING_LIFETIME_DAYS = 15;
 // Twilio) before a public build. Never ship with this true.
 export const LOCAL_AUTH_DEMO = true;
 
+// Code for the local admin panel (Profile -> Admin panel, or /admin). It is a
+// prototype gate, not real security: replace it before the app is public, and
+// move admin auth to Supabase roles in phase 2. Default is the last four digits
+// of the admin test line.
+export const ADMIN_PANEL_CODE = '1903';
+
 // Official USD rate of the National Bank of the Kyrgyz Republic on 12 Nov 2026
 // (87.4496). Listings are stored in dollars; som is this rate, rounded for display.
 export const SOM_PER_USD = 87.45;

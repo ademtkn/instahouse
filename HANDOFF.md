@@ -11,13 +11,51 @@ land, commercial) in Kyrgyzstan. Expo SDK 58 + Expo Router + TypeScript. Local-f
 prototype: the web build (GitHub Pages) is an internal preview. The 2026-11-14 Mashinam
 port is **applied** (brand, one-step phone auth, legal, structured admin form, 15 cities,
 Android nav bar); a native Android release APK is built and tested on the owner's
-Poco X3 Pro (Android 12). iOS is untested. Phase 2 = Supabase.
+Poco X3 Pro (Android 12). A **code-gated admin panel** (`/admin`) now owns the catalogue:
+create/edit listings, active/passive, paid/unpaid + payment code, age and remaining days,
+renew/delete, JSON export/import; the data is stored on the device until Supabase arrives.
+iOS is untested. Phase 2 = Supabase.
 
 - Repo: https://github.com/ademtkn/instahouse (branch `main` = source, `gh-pages` = built site)
 - Live: https://ademtkn.github.io/instahouse/ (base path `/instahouse`, lower-case)
 - Sibling project: Mashinam (`../Mashinam`, same structure, used cars). The owner's standing
   rule: **every task given for one app must also be applied to the other** where it makes sense.
   InstaHouse was derived from Mashinam; when in doubt, look at how Mashinam did it.
+
+## Admin panel (2026-11-22)
+
+Owner-only panel for the real catalogue: `/admin` on the web, or Profile → "Админ-панель" in
+the app. The gate code is `ADMIN_PANEL_CODE = '1903'` in `constants/config.ts` (the last four
+digits of the test line) and the session is remembered on the device. **This is a prototype
+gate, not real security** — the code ships in the bundle; replace it and move to Supabase roles
+when the backend arrives.
+
+- **Catalogue:** listings live in AsyncStorage (`instahouse.listings.v1`) and are seeded once
+  from `data/mockHouses.ts` by `services/listingStore.ts`. `context/ListingsContext.tsx` owns
+  them; the feed and favourites read from it instead of the old static `fetchListings`.
+- **Visibility:** a listing reaches the feed only if it is **active**, **paid** and inside the
+  15-day lifetime (`utils/listingStatus.ts`). New admin listings start active but unpaid, so
+  they stay hidden until the admin marks the payment. Seeded demo listings are active + paid
+  with `DEMO-<ID>` payment codes.
+- **Dashboard:** totals and active/unpaid/expiring/expired stats, search (title, district,
+  city, seller, id), five filters, and a responsive layout — a table on desktop, cards on a
+  phone. Each row has the status switch, the payment switch, the payment code, the creation
+  date and remaining days, Edit, Renew (resets `createdAt`, restarting the 15 days) and Delete
+  with an in-app confirmation.
+- **Form:** deal type, property type, rooms, area/sotka, floor/total floors, documents,
+  furniture, price, city (all 15), district, seller name/type/phone, gallery and the
+  publication/payment block (active, paid, payment code). Photos come from the 16 bundled demo
+  files (`constants/photos.ts`) or a public image URL; there is no upload backend yet. Year,
+  condition and series are intentionally not asked (removed 2026-11-14).
+- **Transfer:** Export/Import JSON in the header copies the whole catalogue for backup or to
+  move it between the laptop and the phone.
+- **Data is per device/browser.** The panel edits this device's store; the published web build
+  is a static site, so listings entered in one browser are not visible to visitors or to the
+  phone. Supabase (phase 2) is the fix: swap the store/context for queries and add admin auth
+  roles + storage.
+- Native check (Android 14 emulator, 2026-11-22): deep link `instahouse:///admin` → gate →
+  code → dashboard; the payment toggle persisted across a force-stop; the edit form opened with
+  the listing prefilled. The Poco was disconnected during this pass.
 
 ## Native Android (built 2026-11-14)
 
@@ -175,9 +213,15 @@ Gotchas:
   admin tool/schema is built (or restore the fields if they are wanted again).
 - Listings expire **15 days** after `createdAt` (`LISTING_LIFETIME_DAYS`). Demo dates are
   relative to "now" and clamped ≤ 14 days.
-- Only the admin posts listings: the "Подать" tab is a **structured form** that composes a
-  Russian message and opens the admin WhatsApp; photos are attached in the chat. The service
-  is free (no paid placement, commission or banners). `ADMIN_CONTACTS` Telegram and
+- **Admin panel:** Profile → "Админ-панель" or `/admin`, code `ADMIN_PANEL_CODE` (prototype).
+  Only active + paid + live listings reach the feed. Payment is recorded manually (paid flag +
+  code); there is no payment provider integration.
+- **Listing data:** the catalogue is on the device (`instahouse.listings.v1`), seeded from the
+  demo data; the feed and favourites read `ListingsContext`. Export the JSON to move it between
+  devices until Supabase.
+- Only the admin posts listings: people send details through the "Подать" **structured form**
+  (a Russian WhatsApp message); the owner enters the actual listing in the admin panel. The
+  service is free (no paid placement, commission or banners). `ADMIN_CONTACTS` Telegram and
   `admin@instahouse.kg` are placeholders.
 - Cities: 15 across Kyrgyzstan (`types/listing.ts`, `constants/cities.ts`); the feed has a city
   modal and defaults to "Весь Кыргызстан".
@@ -198,7 +242,9 @@ Gotchas:
   currency switch) · `favorites.tsx` · `sell.tsx` (structured admin WhatsApp listing form) ·
   `profile.tsx` (edit details, notifications, legal links, sign out, delete account)
 - `app/legal/privacy.tsx`, `app/legal/terms.tsx` · `app/_layout.tsx` (providers, tablet frame,
-  Android nav bar)
+  Android nav bar, wide frame for `/admin`)
+- `app/admin/_layout.tsx` (gate) · `index.tsx` (dashboard) · `edit.tsx` (create/edit form) ·
+  `components/admin/` AdminGate, AdminTransfer (JSON export/import), PhotoPicker, ui
 - `components/ListingCard.tsx` full-screen card (gallery, video, seller row, price drop, specs,
   share) · `FilterBar.tsx` (deal type, property type, city modal, price, rooms) ·
   `CurrencySwitch.tsx` · `SignInSheet.tsx` (phone + WhatsApp OTP demo) · `LegalSheet.tsx` ·
@@ -206,10 +252,12 @@ Gotchas:
   `SellerRow.tsx` · `ActionButtons.tsx` (WhatsApp/call/share) · `FeedVideo(.web).tsx`
 - `constants/` colors, config (`LOCAL_AUTH_DEMO`, `LISTING_LIFETIME_DAYS`, `SOM_PER_USD`,
   `ADMIN_CONTACTS`), i18n (RU/KY/TR + labels), cities, legal, storage
-- `context/` Auth, Favorites, Language, Currency · `hooks/` usePullToRefresh, useSeenListings ·
-  `services/listingService.ts` (data access + price ranges; swap for Supabase in phase 2) ·
-  `utils/` format (price/area/sotka/phone), title, time, media, shuffle, phone,
-  navigationBar(.android).ts · `types/listing.ts` (mirrors the planned Supabase table)
+- `context/` Auth, Favorites, Language, Currency, **Listings** (catalogue + CRUD) · `hooks/`
+  usePullToRefresh, useSeenListings · `services/listingStore.ts` (AsyncStorage catalogue seeded
+  from the demo data) + `listingService.ts` (pure filtering/price helpers) ·
+  `utils/` format (price/area/sotka/phone), title, time, media, shuffle, phone, listingStatus,
+  navigationBar(.android).ts · `types/listing.ts` (mirrors the planned Supabase table) ·
+  `constants/photos.ts` (admin photo library)
 - `data/mockHouses.ts` 50 listings (13 apartments, 13 houses, 12 plots, 12 dachas) ·
   `tools/brand/generate_assets.py` (icon/splash) · `tools/listings/` helper scripts
 
@@ -297,6 +345,20 @@ Gotchas:
   `index.html` matches `dist/` (`__common-5fa0b662d06b71e14a0117b0407fc826.js`) and the live
   form shows rooms/area/floor/documents/furniture but no year, series or condition.
 
+- 2026-11-22 **Admin panel**: code-gated `/admin` (desktop table + phone cards), full listing
+  CRUD with the real-estate fields and photo library/URLs, active/passive and paid/unpaid
+  switches, manual payment code, creation date + remaining days, renew and delete, stats,
+  search/filters and JSON export/import. The catalogue moved to AsyncStorage seeded from the
+  demo data (`ListingsContext`); the feed/favourites read it and only show active + paid + live
+  listings; new listings start unpaid and hidden. RU/KY/TR strings added.
+  Verified on the exported web build with **35 admin-flow checks** (gate, wrong code, create,
+  unpaid hidden, paid visible, inactive hidden, payment code, renew, delete, export/import,
+  lock, mobile form) and a **16-check consumer regression** (feed, card without year/condition/
+  series, 15-city filter, OTP demo sign-in, sell preview) — all pass. The arm64 release APK was
+  rebuilt and checked on the Android 14 emulator: deep link `/admin`, gate, dashboard, payment
+  toggle, persistence after force-stop and the prefilled edit form. The Poco was disconnected,
+  so its installed APK predates the panel.
+
 ## In progress / blocked
 
 - **Real WhatsApp OTP** is not implemented. `LOCAL_AUTH_DEMO=true` is on-device only; set it to
@@ -307,6 +369,16 @@ Gotchas:
 - **Native build:** a standalone **release** APK (34 MB, arm64) is built and tested on a
   Poco X3 Pro (Android 12); it is signed with the debug keystore, so it is local-testing only.
   The debug APK was not reinstalled in this pass. iOS is untested. No EAS project/`eas.json`.
+- **Admin data is per device**; there is no shared backend. Export/import JSON bridges the
+  laptop and the phone; Supabase (listings, admin auth roles, storage) is the next step so the
+  live site and every device see the same catalogue.
+- **Payments are manual** (paid switch + code); there is no payment provider, receipt
+  verification or payment history yet.
+- **Admin photos:** the form uses the 16 bundled demo images or an image URL; uploading from
+  the gallery/camera needs Supabase storage.
+- **Admin gate:** a bundle code (`1903`), not real auth; change it/raise it before public use.
+- **Native device:** the admin APK was verified on the Android 14 emulator; the Poco was
+  disconnected at this pass, so its installed APK still predates the admin panel.
 - **`expo-system-ui`:** not installed, so the declarative dark `userInterfaceStyle` is not
   applied on Android. The app is visually dark anyway; add it before relying on system
   dark-mode APIs.
@@ -322,15 +394,19 @@ Gotchas:
 
 ## Next (owner's roadmap, in priority order)
 
-1. Real admin Telegram handle and e-mail in `constants/config.ts`.
+1. **Supabase (shared catalogue):** `listings` + admin auth roles + image upload; point the
+   admin panel at it so the laptop, the phone and the live site share one catalogue. This is
+   the real fix for the per-device store.
+2. Real payment tracking (provider/receipt) and an admin payment history.
+3. Real admin Telegram handle and e-mail in `constants/config.ts`.
 2. Native-speaker review of the Kyrgyz strings and the Kyrgyz legal text.
 3. Confirm the licence of the 16 demo photos in `public/media/` (or replace them with
    Wikimedia Commons / owner-shot photos with on-card credit, as Mashinam does); owner-shot
    vertical videos of real flats.
 4. Real WhatsApp OTP (Supabase Auth + Send SMS Hook or Twilio Verify), then
    `LOCAL_AUTH_DEMO=false`.
-5. Seed real listings through the admin WhatsApp form; then Supabase (listings/favourites,
-   image/video storage with resized variants, push for price drops, admin upload tool).
+5. Seed real listings through the admin panel; then image/video variants, push for price drops
+   and the public admin request flow.
 6. Tablet 2–3 column grid, analytics/Sentry, store submission (real bundle IDs/domain).
 7. If the GitHub billing lock is lifted: switch Pages source to "GitHub Actions" so pushes to
    `main` auto-deploy.

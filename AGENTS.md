@@ -59,3 +59,13 @@ listing form, 15 Kyrgyzstan cities, the 3 s seen threshold / reshuffle on refres
 `expo-navigation-bar` fix and the tablet frame. The sibling rule still holds: changes that
 make sense for Mashinam should be mirrored there (and vice versa).
 Reference commits (Mashinam): `ed233be`, `196994c`, `53f47a6`, `b6254ca`, `8e6d795`.
+
+## Admin panel (2026-11-22)
+
+`/admin` (Profile → "Админ-панель", code `ADMIN_PANEL_CODE` in `constants/config.ts`) is the
+owner's catalogue editor: create/edit listings, active/passive, paid/unpaid + payment code,
+created date/remaining days, renew/delete, stats/search/filters, JSON export/import. The
+catalogue lives in AsyncStorage via `ListingsContext`/`listingStore` (seeded from
+`data/mockHouses.ts`); the feed and favourites read it and show only active + paid + live
+listings. Data is per device until Supabase; the code gate is a prototype, not real auth.
+Read `HANDOFF.md` → "Admin panel (2026-11-22)" before changing it.

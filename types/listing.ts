@@ -72,7 +72,16 @@ export interface Listing {
   sellerPhone: string; // E.164, e.g. +996555123456
   whatsappPhone: string;
   createdAt: string;
+  // Admin panel fields (undefined on demo rows = active + paid).
+  status?: ListingStatus;
+  paid?: boolean;
+  paymentCode?: string;
+  paidAt?: string;
 }
+
+// Admin-controlled publication state. Legacy/demo rows leave the optional fields
+// undefined and are treated as active + paid (see utils/listingStatus.ts).
+export type ListingStatus = 'active' | 'inactive';
 
 export type PriceRangeId = 'all' | 'low' | 'mid' | 'high';
 export type RoomsFilter = 'all' | '1' | '2' | '3' | '4+';

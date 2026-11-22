@@ -7,6 +7,13 @@ export const hoursAgo = (h: number) => new Date(LOADED_AT - h * 3600_000).toISOS
 
 export const NEW_WINDOW_MS = 24 * 3600_000;
 
+// 22.11.2026 14:30 — numeric and language-neutral, used by the admin panel.
+export function formatDateTime(iso: string): string {
+  const d = new Date(iso);
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${p(d.getDate())}.${p(d.getMonth() + 1)}.${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
 // Listings live for LISTING_LIFETIME_DAYS after posting.
 export const daysLeft = (createdAt: string) =>
   Math.ceil((Date.parse(createdAt) + LISTING_LIFETIME_DAYS * 86_400_000 - Date.now()) / 86_400_000);

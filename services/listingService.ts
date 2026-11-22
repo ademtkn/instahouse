@@ -1,7 +1,6 @@
-import { mockHouses } from '../data/mockHouses';
 import type { DealType, Listing, ListingFilters, PriceRangeId, RoomsFilter } from '../types/listing';
 import { shuffle } from '../utils/shuffle';
-import { isLive, isNew } from '../utils/time';
+import { isNew } from '../utils/time';
 
 // Phase 2: replace the body of these functions with Supabase queries.
 // Screens only talk to this module, so nothing else needs to change.
@@ -31,12 +30,6 @@ export const PRICE_RANGES: Record<DealType, PriceRange[]> = {
 };
 
 export const ROOMS_FILTERS: RoomsFilter[] = ['all', '1', '2', '3', '4+'];
-
-export async function fetchListings(): Promise<Listing[]> {
-  await new Promise((r) => setTimeout(r, 350));
-  // Expired listings (older than LISTING_LIFETIME_DAYS) never reach the feed.
-  return mockHouses.filter((l) => isLive(l.createdAt));
-}
 
 export const isPriceDrop = (l: Listing) => l.oldPriceUsd !== undefined && l.oldPriceUsd > l.priceUsd;
 export const isFresh = (l: Listing) => isNew(l.createdAt) || isPriceDrop(l);

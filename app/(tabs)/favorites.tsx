@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
@@ -12,8 +11,8 @@ import { useAuth } from '../../context/AuthContext';
 import { useFavorites } from '../../context/FavoritesContext';
 import { useCurrency } from '../../context/CurrencyContext';
 import { useLang } from '../../context/LanguageContext';
-import { fetchListings } from '../../services/listingService';
-import type { Listing } from '../../types/listing';
+import { useListings } from '../../context/ListingsContext';
+import { publishedListings } from '../../utils/listingStatus';
 import { priceLabel } from '../../utils/format';
 import { listingTitle } from '../../utils/title';
 
@@ -24,14 +23,10 @@ export default function FavoritesScreen() {
   const { user, requireAuth } = useAuth();
   const { lang, t } = useLang();
   const { currency } = useCurrency();
-  // null until loaded, so the empty state doesn't flash before the list arrives.
-  const [listings, setListings] = useState<Listing[] | null>(null);
+  const { listings: catalogue, ready } = useListings();
 
-  useEffect(() => {
-    fetchListings().then(setListings);
-  }, []);
-
-  const favorites = (listings ?? []).filter((l) => ids.has(l.id));
+  // Only listings that are active, paid and unexpired can be in favourites.
+  const favorites = publishedListings(catalogue ?? []).filter((l) => ids.has(l.id));
 
   return (
     <View style={[styles.container, { paddingTop: insets.top + 12 }]}>
@@ -50,7 +45,7 @@ export default function FavoritesScreen() {
             <Text style={styles.ctaText}>{t('auth.register')}</Text>
           </Pressable>
         </View>
-      ) : listings === null ? null : favorites.length === 0 ? (
+      ) : !ready ? null : favorites.length === 0 ? (
         <View style={styles.empty}>
           <Heart size={52} color={Colors.textFaint} />
           <Text style={styles.emptyTitle}>{t('fav.emptyTitle')}</Text>

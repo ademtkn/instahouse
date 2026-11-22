@@ -23,16 +23,17 @@ import {
   DEFAULT_FILTERS,
   arrangeFeed,
   countFresh,
-  fetchListings,
   filterListings,
   filtersFor,
   type FeedArrangement,
 } from '../../services/listingService';
 import { LANGS, LANG_LABEL } from '../../constants/i18n';
 import { useLang } from '../../context/LanguageContext';
+import { useListings } from '../../context/ListingsContext';
 import { useSeenListings } from '../../hooks/useSeenListings';
 import { PULL_MAX, PULL_THRESHOLD, usePullToRefresh } from '../../hooks/usePullToRefresh';
 import type { Listing, ListingFilters } from '../../types/listing';
+import { publishedListings } from '../../utils/listingStatus';
 
 const IS_WEB = Platform.OS === 'web';
 // On web, cards this far from the active one render as an empty placeholder.
@@ -50,6 +51,7 @@ export default function FeedScreen() {
   const { home: pinnedParam } = useLocalSearchParams<{ home?: string }>();
   const pinnedId = typeof pinnedParam === 'string' ? pinnedParam : null;
 
+  const { listings: catalogue, ready: catalogueReady } = useListings();
   const [listings, setListings] = useState<Listing[] | null>(null);
   const [filters, setFilters] = useState<ListingFilters>(DEFAULT_FILTERS);
   const [size, setSize] = useState({ width: 0, height: 0 });
@@ -61,9 +63,10 @@ export default function FeedScreen() {
   const { ready: seenReady, markSeen, snapshot: snapshotSeen } = useSeenListings();
 
   // Unseen listings first (shuffled), then the ones this device has already seen.
+  // Only active + paid + unexpired listings reach the feed.
   const buildFeed = useCallback(
-    async () => arrangeFeed(await fetchListings(), snapshotSeen(), pinnedId),
-    [snapshotSeen, pinnedId],
+    () => arrangeFeed(publishedListings(catalogue ?? []), snapshotSeen(), pinnedId),
+    [catalogue, snapshotSeen, pinnedId],
   );
   const applyFeed = useCallback(({ listings: ordered, seenAtLoad: seenIds }: FeedArrangement) => {
     setListings(ordered);
@@ -71,10 +74,13 @@ export default function FeedScreen() {
   }, []);
 
   useEffect(() => {
-    if (!seenReady) return;
+    if (!seenReady || !catalogueReady) return;
     let alive = true;
-    buildFeed().then((feed) => {
+    // The store is local, but keep the deferred shape so the effect does not
+    // set state synchronously (and so a fast admin edit cannot race the feed).
+    Promise.resolve().then(() => {
       if (!alive) return;
+      const feed = buildFeed();
       applyFeed(feed);
       // A shared rental must not be hidden behind the default "sale" switch.
       if (pinnedId) setFilters(filtersFor(feed.listings.find((l) => l.id === pinnedId)));
@@ -82,7 +88,7 @@ export default function FeedScreen() {
     return () => {
       alive = false;
     };
-  }, [seenReady, buildFeed, applyFeed, pinnedId]);
+  }, [seenReady, catalogueReady, buildFeed, applyFeed, pinnedId]);
 
   const scrollY = useRef(0);
   const sizeRef = useRef(size);
@@ -94,7 +100,7 @@ export default function FeedScreen() {
   // every pull / tab press, even with filters, so the top of the feed is always
   // a fresh random pick. Already-seen listings never move back to the top.
   const reload = useCallback(async () => {
-    applyFeed(await buildFeed());
+    applyFeed(buildFeed());
     listRef.current?.scrollToOffset({ offset: 0, animated: false });
   }, [buildFeed, applyFeed]);
 
@@ -192,7 +198,7 @@ export default function FeedScreen() {
 
   return (
     <View style={styles.container} onLayout={onLayout} {...(Platform.OS === 'web' ? touchHandlers : null)}>
-      {listings === null || size.height === 0 ? (
+      {!catalogueReady || listings === null || size.height === 0 ? (
         <View style={styles.center}>
           <ActivityIndicator color={Colors.amber} size="large" />
         </View>
