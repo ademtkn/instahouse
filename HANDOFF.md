@@ -359,6 +359,10 @@ Gotchas:
   toggle, persistence after force-stop and the prefilled edit form. The Poco was disconnected,
   so its installed APK predates the panel.
 
+- 2026-11-22 **Published** `gh-pages 49b2e47` from `main 72065f4`: the live `/admin` deep
+  link (served through the 404.html fallback) shows the gate, accepts the code and loads the
+  50-listing dashboard; the live feed still renders with no console errors.
+
 ## In progress / blocked
 
 - **Real WhatsApp OTP** is not implemented. `LOCAL_AUTH_DEMO=true` is on-device only; set it to
